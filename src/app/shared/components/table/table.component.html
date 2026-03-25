@@ -1,0 +1,15 @@
+<table border="1" width="100%">
+  <thead>
+    <tr>
+      <th *ngFor="let header of headers">{{ header }}</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let row of data">
+      <td *ngFor="let col of columns">
+        {{ row[col] }}
+      </td>
+    </tr>
+  </tbody>
+</table>
