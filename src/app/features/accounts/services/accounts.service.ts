@@ -1,62 +1,49 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-import { ApiService } from '../../../core/services/api.service';
-import { Account } from '../models/account.model';
-import { Transaction } from '../models/transaction.model';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountsService {
+  private baseUrl = 'http://localhost:3000';
 
-  constructor(private api: ApiService) {}
+  constructor(private http: HttpClient) {}
 
-  // 🔹 Account Overview (Mock Data)
-  getAccounts(): Observable<Account[]> {
-    return of([
-      {
-        id: '1',
-        accountNumber: '123456789',
-        accountType: 'Savings',
-        balance: 5000,
-        currency: 'INR',
-        status: 'Active'
-      },
-      {
-        id: '2',
-        accountNumber: '987654321',
-        accountType: 'Current',
-        balance: 12000,
-        currency: 'INR',
-        status: 'Active'
-      }
-    ]);
+  getAccounts(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/accounts`);
   }
 
-  // 🔹 Transactions (Mock Data)
-  getTransactions(accountId: string): Observable<{ data: Transaction[] }> {
-    return of({
-      data: [
-        {
-          id: '1',
-          accountId,
-          date: '2024-03-01',
-          amount: 1000,
-          type: 'Credit',
-          description: 'Salary',
-          status: 'Completed'
-        },
-        {
-          id: '2',
-          accountId,
-          date: '2024-03-02',
-          amount: 200,
-          type: 'Debit',
-          description: 'Groceries',
-          status: 'Completed'
-        }
-      ]
-    });
+  getTransactions(
+    accountId: string,
+    page: number,
+    limit: number,
+    filters: any,
+    sortField: string,
+    sortOrder: string
+  ): Observable<any> {
+    let params = new HttpParams().set('accountId', accountId);
+
+    // Safe Pagination 
+    if (page) params = params.set('_page', page);
+    if (limit) {
+      params = params.set('_limit', limit);
+      params = params.set('_per_page', limit);
+    }
+    if (sortField) params = params.set('_sort', sortField);
+    if (sortOrder) params = params.set('_order', sortOrder);
+
+    // Safe Filtering (Prevents sending 'null' and breaking the database)
+    if (filters && filters.type && filters.type !== '') {
+      params = params.set('type', filters.type);
+    }
+    if (filters && filters.minAmount !== null) {
+      params = params.set('amount_gte', filters.minAmount);
+    }
+    if (filters && filters.maxAmount !== null) {
+      params = params.set('amount_lte', filters.maxAmount);
+    }
+
+    return this.http.get<any>(`${this.baseUrl}/transactions`, { params });
   }
 }
