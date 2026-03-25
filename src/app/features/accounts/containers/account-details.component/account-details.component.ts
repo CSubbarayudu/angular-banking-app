@@ -14,7 +14,9 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
     <div style="padding: 20px;">
       <h2>Account Details</h2>
 
-      <div *ngIf="account" style="border: 1px solid #ccc; padding: 15px; border-radius: 6px; margin-bottom: 20px; background: #f9f9f9;">
+      <!-- Account Info -->
+      <div *ngIf="account"
+           style="border: 1px solid #ccc; padding: 15px; border-radius: 6px; margin-bottom: 20px; background: #f9f9f9;">
         <p><b>Account No:</b> {{ account.accountNumber }}</p>
         <p><b>Type:</b> {{ account.accountType }}</p>
         <p><b>Balance:</b> ₹{{ account.balance }}</p>
@@ -23,7 +25,9 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
 
       <h3>Transactions</h3>
 
+      <!-- Filters -->
       <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+        
         <div>
           <label style="display:block; font-size: 12px;">Type:</label>
           <select [(ngModel)]="filterType" style="padding: 5px;">
@@ -32,27 +36,43 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
             <option value="Debit">Debit</option>
           </select>
         </div>
+
         <div>
           <label style="display:block; font-size: 12px;">Min Amount:</label>
           <input type="number" [(ngModel)]="minAmount" style="padding: 5px; width: 100px;">
         </div>
+
         <div>
           <label style="display:block; font-size: 12px;">Max Amount:</label>
           <input type="number" [(ngModel)]="maxAmount" style="padding: 5px; width: 100px;">
         </div>
+
         <div style="display:flex; gap: 10px;">
-          <button (click)="applyFilters()" style="background: #007bff; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">Apply</button>
-          <button (click)="clearFilters()" style="background: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">Clear</button>
+          <button (click)="applyFilters()" style="background: #007bff; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">
+            Apply
+          </button>
+
+          <button (click)="clearFilters()" style="background: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">
+            Clear
+          </button>
         </div>
       </div>
 
+      <!-- Sorting -->
       <div style="margin-bottom: 10px;">
-        <button (click)="sort('amount')" style="margin-right: 10px; padding: 5px 10px; cursor: pointer;">↕ Sort by Amount</button>
-        <button (click)="sort('date')" style="padding: 5px 10px; cursor: pointer;">↕ Sort by Date</button>
+        <button (click)="sort('amount')" style="margin-right: 10px; padding: 5px 10px;">
+          ↕ Sort by Amount
+        </button>
+
+        <button (click)="sort('date')" style="padding: 5px 10px;">
+          ↕ Sort by Date
+        </button>
       </div>
 
+      <!-- Loader -->
       <div *ngIf="loading">Loading transactions...</div>
 
+      <!-- Table -->
       <app-table
         *ngIf="!loading && transactions.length > 0"
         [headers]="['Date', 'Amount', 'Type', 'Status']"
@@ -60,29 +80,42 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
         [data]="transactions">
       </app-table>
 
+      <!-- Empty -->
       <p *ngIf="!loading && transactions.length === 0" style="color: #666;">
-        No transactions found matching your filters.
+        No transactions found.
       </p>
 
-      <div *ngIf="transactions.length > 0 || page > 1" style="margin-top:20px; display: flex; align-items: center; gap: 15px;">
-        <button (click)="prevPage()" [disabled]="page === 1" style="padding: 6px 12px; cursor: pointer;">Prev</button>
-        <span style="font-weight: bold;">Page: {{ page }}</span>
-        <button (click)="nextPage()" style="padding: 6px 12px; cursor: pointer;">Next</button>
+      <!-- Pagination -->
+      <div *ngIf="transactions.length > 0 || page > 1"
+           style="margin-top:20px; display: flex; align-items: center; gap: 15px;">
+        
+        <button (click)="prevPage()" [disabled]="page === 1">
+          Prev
+        </button>
+
+        <span><b>Page: {{ page }}</b></span>
+
+        <button (click)="nextPage()">
+          Next
+        </button>
       </div>
 
-      <button (click)="downloadStatement()" style="margin-top: 20px; background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+      <!-- Download -->
+      <button (click)="downloadStatement()"
+              style="margin-top: 20px; background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px;">
         Download Statement
       </button>
     </div>
   `
 })
 export class AccountDetailsComponent implements OnInit {
+
   accountId!: string;
   account: Account | null = null;
   transactions: any[] = [];
   loading = false;
 
-  // Filter States
+  // Filters & State
   page = 1;
   limit = 5;
   sortField = 'date';
@@ -91,7 +124,10 @@ export class AccountDetailsComponent implements OnInit {
   minAmount: number | null = null;
   maxAmount: number | null = null;
 
-  constructor(private route: ActivatedRoute, private service: AccountsService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private service: AccountsService
+  ) {}
 
   ngOnInit(): void {
     this.accountId = this.route.snapshot.paramMap.get('id') || '1';
@@ -99,33 +135,44 @@ export class AccountDetailsComponent implements OnInit {
     this.loadTransactions();
   }
 
+  // ✅ FIXED: NO .data
   loadAccount(): void {
     this.service.getAccounts().subscribe(res => {
-      // Safely extract data
-      const accountsArray = (res as any).data ? (res as any).data : res;
-      this.account = accountsArray.find((acc: any) => acc.id === this.accountId) || accountsArray[0];
+      console.log('Accounts:', res);
+
+      this.account =
+        res.find((acc: any) => acc.id === this.accountId) || res[0];
     });
   }
 
+  // ✅ FIXED: NO .data
   loadTransactions(): void {
     this.loading = true;
+
     const filters = {
       type: this.filterType,
       minAmount: this.minAmount,
       maxAmount: this.maxAmount
     };
 
-    this.service.getTransactions(this.accountId, this.page, this.limit, filters, this.sortField, this.sortOrder)
-      .subscribe({
-        next: (res: any) => {
-          // THIS IS THE FIX. Extracts the data from the json-server envelope.
-          this.transactions = res.data ? res.data : res;
-          this.loading = false;
-        },
-        error: () => {
-          this.loading = false;
-        }
-      });
+    this.service.getTransactions(
+      this.accountId,
+      this.page,
+      this.limit,
+      filters,
+      this.sortField,
+      this.sortOrder
+    ).subscribe({
+      next: (res) => {
+        console.log('Transactions:', res);
+
+        this.transactions = res; // 🔥 DIRECT ARRAY
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
   }
 
   applyFilters() {
@@ -160,14 +207,18 @@ export class AccountDetailsComponent implements OnInit {
   }
 
   downloadStatement() {
-    if (!this.transactions || this.transactions.length === 0) return;
+    if (!this.transactions.length) return;
+
     const data = JSON.stringify(this.transactions, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
+
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
+
     a.href = url;
     a.download = `statement_account_${this.accountId}.json`;
     a.click();
+
     window.URL.revokeObjectURL(url);
   }
 }

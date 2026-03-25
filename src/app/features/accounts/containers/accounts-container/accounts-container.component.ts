@@ -1,24 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-
 import { AccountsService } from '../../services/accounts.service';
-import { Account } from '../../models/account.model';
-import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
-import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
 
 @Component({
   selector: 'app-accounts-container',
   standalone: true,
-  imports: [CommonModule, LoaderComponent, ErrorMessageComponent],
+  imports: [CommonModule],
   template: `
     <div style="padding: 20px;">
       <h2>Accounts Overview</h2>
 
-      <app-loader *ngIf="loading"></app-loader>
-      <app-error-message *ngIf="error" [message]="error"></app-error-message>
+      <!-- Loading -->
+      <div *ngIf="loading" style="padding: 10px; color: blue;">
+        Loading data from server...
+      </div>
 
-      <table border="1" width="100%" *ngIf="!loading && accounts.length > 0" style="border-collapse: collapse; margin-top: 20px; text-align: left;">
+      <!-- Error -->
+      <div *ngIf="error" style="padding: 10px; color: red;">
+        {{ error }}
+      </div>
+
+      <!-- Table -->
+      <table *ngIf="!loading && accounts.length > 0"
+             border="1"
+             width="100%"
+             style="border-collapse: collapse; margin-top: 20px; text-align: left;">
+        
         <thead style="background-color: #f4f6f8;">
           <tr>
             <th style="padding: 10px;">Account No</th>
@@ -27,8 +35,12 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
             <th style="padding: 10px;">Status</th>
           </tr>
         </thead>
+
         <tbody>
-          <tr *ngFor="let acc of accounts" (click)="goToDetails(acc.id)" style="cursor: pointer; border-bottom: 1px solid #ddd;">
+          <tr *ngFor="let acc of accounts"
+              (click)="goToDetails(acc.id)"
+              style="cursor: pointer; border-bottom: 1px solid #ddd;">
+            
             <td style="padding: 10px;">{{ acc.accountNumber }}</td>
             <td style="padding: 10px;">{{ acc.accountType }}</td>
             <td style="padding: 10px;">₹{{ acc.balance }}</td>
@@ -37,31 +49,57 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
         </tbody>
       </table>
 
-      <p *ngIf="!loading && accounts.length === 0" style="padding: 20px;">No accounts available</p>
+      <!-- Empty State -->
+      <div *ngIf="!loading && accounts.length === 0" style="margin-top: 20px;">
+        No accounts found.
+      </div>
+
+      <!-- Debug Section -->
+      <div style="margin-top: 40px; padding: 15px; background: #e9ecef; border-radius: 5px;">
+        <h4>System Debugger</h4>
+        <p><strong>Total Accounts Found:</strong> {{ accounts.length }}</p>
+        <pre style="font-size: 12px; max-height: 200px; overflow-y: auto;">
+{{ accounts | json }}
+        </pre>
+      </div>
     </div>
   `
 })
 export class AccountsContainerComponent implements OnInit {
-  accounts: Account[] = [];
+
+  accounts: any[] = [];
   loading = false;
   error = '';
 
-  constructor(private accountsService: AccountsService, private router: Router) {}
+  constructor(
+    private accountsService: AccountsService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadAccounts();
   }
 
-  loadAccounts() {
+  // 🔥 FINAL FIXED METHOD
+  loadAccounts(): void {
     this.loading = true;
+
+    console.log('🔥 Calling API...');
+
     this.accountsService.getAccounts().subscribe({
-      next: (res: any) => {
-        // Safely open the envelope to fix the infinite loading screen!
-        this.accounts = res.data ? res.data : res;
+      next: (res) => {
+        console.log('✅ Accounts API:', res);
+
+        // 🔥 CRITICAL FIX: force new reference
+        this.accounts = [...res];
+
+        console.log('📊 After assignment:', this.accounts);
+
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Failed to load accounts. Ensure json-server is running.';
+        console.error('❌ API ERROR:', err);
+        this.error = 'Failed to connect to JSON Server (port 3005)';
         this.loading = false;
       }
     });

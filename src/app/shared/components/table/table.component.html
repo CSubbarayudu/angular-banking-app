@@ -1,13 +1,15 @@
-<table border="1" width="100%">
+<table border="1" width="100%" style="border-collapse: collapse;">
   <thead>
     <tr>
-      <th *ngFor="let header of headers">{{ header }}</th>
+      <th *ngFor="let header of headers" style="padding: 8px;">
+        {{ header }}
+      </th>
     </tr>
   </thead>
 
   <tbody>
     <tr *ngFor="let row of data">
-      <td *ngFor="let col of columns">
+      <td *ngFor="let col of columns" style="padding: 8px;">
         {{ row[col] }}
       </td>
     </tr>
