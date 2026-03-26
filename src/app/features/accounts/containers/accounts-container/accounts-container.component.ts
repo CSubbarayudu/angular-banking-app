@@ -2,13 +2,12 @@ import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
-import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'app-accounts-container',
   standalone: true,
-  imports: [CommonModule, TableComponent],
-  changeDetection: ChangeDetectionStrategy.Default,  // ← keep Default, NOT OnPush
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.Default,
   template: `
     <div style="padding: 20px;">
       <h2>Accounts Overview</h2>
@@ -22,29 +21,44 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
       </ng-container>
 
       <ng-container *ngIf="!loading && accounts.length > 0">
-        <app-table
-          [headers]="['Account No', 'Type', 'Balance', 'Status']"
-          [columns]="['accountNumber', 'accountType', 'balance', 'status']"
-          [data]="accounts">
-        </app-table>
+        <table border="1" style="width:100%; border-collapse:collapse; margin-top:10px;">
+          <thead style="background:#f0f0f0;">
+            <tr>
+              <th style="padding:10px; text-align:left;">Account No</th>
+              <th style="padding:10px; text-align:left;">Type</th>
+              <th style="padding:10px; text-align:left;">Balance</th>
+              <th style="padding:10px; text-align:left;">Status</th>
+              <th style="padding:10px; text-align:left;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let acc of accounts">
+              <td style="padding:10px;">{{ acc.accountNumber }}</td>
+              <td style="padding:10px;">{{ acc.accountType }}</td>
+              <td style="padding:10px;">₹{{ acc.balance }}</td>
+              <td style="padding:10px;">{{ acc.status }}</td>
+              <td style="padding:10px;">
+                <button
+                  (click)="goToDetails(acc.id)"
+                  style="background:#007bff; color:white; border:none; padding:6px 14px; border-radius:4px; cursor:pointer;">
+                  View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </ng-container>
 
       <ng-container *ngIf="!loading && accounts.length === 0 && !error">
         <p>No accounts found.</p>
       </ng-container>
-
-      <!-- Remove this block before assessment submission -->
-      <div style="margin-top: 30px; background:#e9ecef; padding:12px; border-radius:5px;">
-        <strong>Debug: Total Accounts = {{ accounts.length }}</strong>
-        <pre style="font-size:11px; max-height:200px; overflow-y:auto;">{{ accounts | json }}</pre>
-      </div>
     </div>
   `
 })
 export class AccountsContainerComponent implements OnInit {
 
   accounts: any[] = [];
-  loading = true;   // ← START as true, not false
+  loading = true;
   error = '';
 
   constructor(
@@ -65,8 +79,8 @@ export class AccountsContainerComponent implements OnInit {
       next: (res: any) => {
         this.accounts = Array.isArray(res) ? res : (res?.data ?? []);
         this.loading = false;
-        this.cdr.markForCheck();   // ← tells Angular: "re-check this component now"
-        this.cdr.detectChanges();  // ← forces immediate DOM update
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('API ERROR:', err);

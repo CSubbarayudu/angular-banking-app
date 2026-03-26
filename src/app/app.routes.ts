@@ -4,16 +4,24 @@ import { authGuard } from './core/guards/auth-guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'accounts',
+    redirectTo: 'dashboard',
     pathMatch: 'full'
   },
   {
-    path: 'accounts',
-    canActivate: [authGuard], // 🛡️ Section 5.3 Requirement Met!
-    loadChildren: () => import('./features/accounts/accounts.module').then(m => m.AccountsModule)
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./features/dashboard/dashboard.component')
+        .then(m => m.DashboardComponent)
   },
   {
-    path: '**', // 🛡️ Section 5.5 Fallback route handling
-    redirectTo: 'accounts'
+    path: 'accounts',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/accounts/accounts.module')
+        .then(m => m.AccountsModule)
+  },
+  {
+    path: '**',
+    redirectTo: 'dashboard'
   }
 ];
