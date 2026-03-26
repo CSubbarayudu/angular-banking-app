@@ -27,3 +27,8 @@ button {
   margin-top: 10px;
   cursor: pointer;
 }
+
+.nav-active {
+  background: rgba(255,255,255,0.2) !important;
+  border-radius: 4px;
+}

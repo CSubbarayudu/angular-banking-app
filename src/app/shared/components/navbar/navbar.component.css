@@ -1,0 +1,24 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #003366;
+  padding: 10px 16px;
+}
+
+.brand {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.links a {
+  color: #ffffff;
+  text-decoration: none;
+  padding: 6px 14px;
+  margin-left: 8px;
+}
+
+.nav-active {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
