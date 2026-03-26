@@ -1,35 +1,15 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse
-} from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID, inject } from '@angular/core';
 
-@Injectable()
-export class HttpErrorInterceptor implements HttpInterceptor {
+// Inside your catchError block, replace:
+// if (error instanceof ErrorEvent) { ... }
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req).pipe(
-      catchError((error: HttpErrorResponse) => {
-
-        let message = '';
-
-        if (error.error instanceof ErrorEvent) {
-          message = `Client Error: ${error.error.message}`;
-        } else {
-          message = `Server Error Code: ${error.status}`;
-        }
-
-        console.error('Secure Log:', message);
-
-        return throwError(() =>
-          new Error('Something went wrong. Please try again later.')
-        );
-      })
-    );
-  }
+// With this safe check:
+const platformId = inject(PLATFORM_ID);
+if (isPlatformBrowser(platformId) && typeof ErrorEvent !== 'undefined' && error instanceof ErrorEvent) {
+  // client-side network error
+  console.error('Client Error:', error.message);
+} else {
+  // server-side or HTTP error
+  console.error('Server Error:', error.status, error.message);
 }

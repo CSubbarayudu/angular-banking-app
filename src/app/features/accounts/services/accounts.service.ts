@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AccountsService {
@@ -23,25 +22,16 @@ export class AccountsService {
     sortOrder: string
   ): Observable<any[]> {
 
-    // Build params compatible with BOTH json-server v0 and v1
     let params = new HttpParams()
-      .set('accountId', accountId)
+      .set('accountId', accountId)   // ← json-server v0 uses exact field name match
       .set('_page', page.toString())
-      .set('_per_page', limit.toString())
-      .set('_limit', limit.toString());    // v0 fallback
+      .set('_limit', limit.toString())
+      .set('_sort', sortField)
+      .set('_order', sortOrder);     // 'asc' or 'desc'
 
-    // Sorting: json-server v1 uses '-field' for desc
-    if (sortField) {
-      const sortValue = sortOrder === 'desc' ? `-${sortField}` : sortField;
-      params = params.set('_sort', sortValue);
-    }
-
-    // Type filter
     if (filters?.type) {
       params = params.set('type', filters.type);
     }
-
-    // Amount range filters
     if (filters?.minAmount !== null && filters?.minAmount !== undefined) {
       params = params.set('amount_gte', filters.minAmount.toString());
     }
@@ -49,13 +39,7 @@ export class AccountsService {
       params = params.set('amount_lte', filters.maxAmount.toString());
     }
 
-    // Handle BOTH json-server v0 (returns array) and v1 (returns {data:[...]})
-    return this.http.get<any>(`${this.baseUrl}/transactions`, { params }).pipe(
-      map((res: any) => {
-        if (Array.isArray(res)) return res;           // v0 returns plain array
-        if (res && Array.isArray(res.data)) return res.data;  // v1 wraps in {data:[]}
-        return [];
-      })
-    );
+    // json-server v0 always returns a plain array — no wrapping needed
+    return this.http.get<any[]>(`${this.baseUrl}/transactions`, { params });
   }
 }
