@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
@@ -7,7 +7,6 @@ import { AccountsService } from '../../services/accounts.service';
   selector: 'app-accounts-container',
   standalone: true,
   imports: [CommonModule],
-  changeDetection: ChangeDetectionStrategy.Default,
   template: `
     <div style="padding: 20px;">
       <h2>Accounts Overview</h2>
@@ -36,11 +35,17 @@ import { AccountsService } from '../../services/accounts.service';
               <td style="padding:10px;">{{ acc.accountNumber }}</td>
               <td style="padding:10px;">{{ acc.accountType }}</td>
               <td style="padding:10px;">₹{{ acc.balance }}</td>
-              <td style="padding:10px;">{{ acc.status }}</td>
+              <td style="padding:10px;">
+                <span [style.color]="acc.status === 'Active' ? 'green' :
+                                     acc.status === 'Blocked' ? 'red' : 'orange'">
+                  {{ acc.status }}
+                </span>
+              </td>
               <td style="padding:10px;">
                 <button
                   (click)="goToDetails(acc.id)"
-                  style="background:#007bff; color:white; border:none; padding:6px 14px; border-radius:4px; cursor:pointer;">
+                  style="background:#007bff; color:white; border:none;
+                         padding:6px 14px; border-radius:4px; cursor:pointer;">
                   View
                 </button>
               </td>
@@ -79,15 +84,13 @@ export class AccountsContainerComponent implements OnInit {
       next: (res: any) => {
         this.accounts = Array.isArray(res) ? res : (res?.data ?? []);
         this.loading = false;
-        this.cdr.markForCheck();
-        this.cdr.detectChanges();
+        this.cdr.detectChanges();   // ← only this, no markForCheck
       },
       error: (err: any) => {
         console.error('API ERROR:', err);
         this.error = 'Failed to load accounts from server.';
         this.loading = false;
-        this.cdr.markForCheck();
-        this.cdr.detectChanges();
+        this.cdr.detectChanges();   // ← only this
       }
     });
   }
