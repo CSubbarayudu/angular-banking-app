@@ -1,1 +1,29 @@
-<p>accounts-container works!</p>
+<div style="padding: 20px;">
+  <h2>Accounts Overview</h2>
+
+  <div *ngIf="loading" style="color: blue; padding: 10px;">
+    Loading accounts...
+  </div>
+
+  <div *ngIf="error" style="color: red; padding: 10px;">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && accounts.length > 0" style="margin-top: 20px;">
+    <app-table
+      [headers]="['Account No', 'Type', 'Balance', 'Status']"
+      [columns]="['accountNumber', 'accountType', 'balance', 'status']"
+      [data]="accounts">
+    </app-table>
+  </div>
+
+  <div *ngIf="!loading && accounts.length === 0 && !error">
+    No accounts found.
+  </div>
+
+  <!-- DEBUGGER PANEL — remove before final assessment submission -->
+  <div style="margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+    <strong>Debug: Total Accounts = {{ accounts.length }}</strong>
+    <pre style="font-size: 11px; max-height: 200px; overflow-y: auto;">{{ accounts | json }}</pre>
+  </div>
+</div>

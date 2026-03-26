@@ -1,44 +1,42 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
-// 1. IMPORT YOUR SHARED TABLE
 import { TableComponent } from '../../../../shared/components/table/table.component';
+
 @Component({
   selector: 'app-accounts-container',
   standalone: true,
-  // 2. ADD TABLECOMPONENT TO IMPORTS
-  imports: [CommonModule, TableComponent], 
+  imports: [CommonModule, TableComponent],
+  changeDetection: ChangeDetectionStrategy.Default,  // ← keep Default, NOT OnPush
   template: `
     <div style="padding: 20px;">
       <h2>Accounts Overview</h2>
 
-      <div *ngIf="loading" style="padding: 10px; color: blue;">
-        Loading data from server...
-      </div>
+      <ng-container *ngIf="loading">
+        <p style="color: blue;">Loading accounts...</p>
+      </ng-container>
 
-      <div *ngIf="error" style="padding: 10px; color: red;">
-        {{ error }}
-      </div>
+      <ng-container *ngIf="error">
+        <p style="color: red;">{{ error }}</p>
+      </ng-container>
 
-      <div *ngIf="!loading && accounts.length > 0" style="margin-top: 20px;">
-        <app-table 
+      <ng-container *ngIf="!loading && accounts.length > 0">
+        <app-table
           [headers]="['Account No', 'Type', 'Balance', 'Status']"
           [columns]="['accountNumber', 'accountType', 'balance', 'status']"
           [data]="accounts">
         </app-table>
-      </div>
+      </ng-container>
 
-      <div *ngIf="!loading && accounts.length === 0 && !error" style="margin-top: 20px;">
-        No accounts found.
-      </div>
+      <ng-container *ngIf="!loading && accounts.length === 0 && !error">
+        <p>No accounts found.</p>
+      </ng-container>
 
-      <div style="margin-top: 40px; padding: 15px; background: #e9ecef; border-radius: 5px;">
-        <h4>System Debugger</h4>
-        <p><strong>Total Accounts Found:</strong> {{ accounts.length }}</p>
-        <pre style="font-size: 12px; max-height: 200px; overflow-y: auto;">
-{{ accounts | json }}
-        </pre>
+      <!-- Remove this block before assessment submission -->
+      <div style="margin-top: 30px; background:#e9ecef; padding:12px; border-radius:5px;">
+        <strong>Debug: Total Accounts = {{ accounts.length }}</strong>
+        <pre style="font-size:11px; max-height:200px; overflow-y:auto;">{{ accounts | json }}</pre>
       </div>
     </div>
   `
@@ -46,12 +44,13 @@ import { TableComponent } from '../../../../shared/components/table/table.compon
 export class AccountsContainerComponent implements OnInit {
 
   accounts: any[] = [];
-  loading = false;
+  loading = true;   // ← START as true, not false
   error = '';
 
   constructor(
     private accountsService: AccountsService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -60,35 +59,26 @@ export class AccountsContainerComponent implements OnInit {
 
   loadAccounts(): void {
     this.loading = true;
-    console.log('🔥 Calling API...');
+    this.error = '';
 
     this.accountsService.getAccounts().subscribe({
       next: (res: any) => {
-        console.log('✅ RAW Accounts API Response:', res);
-
-        // 4. BULLETPROOF DATA ASSIGNMENT
-        // This handles both pure Arrays AND objects with a 'data' property
-        if (Array.isArray(res)) {
-          this.accounts = res;
-        } else if (res && Array.isArray(res.data)) {
-          this.accounts = res.data;
-        } else {
-          console.error('🚨 Unexpected Data Format!', res);
-          this.accounts = []; 
-        }
-
-        console.log('📊 Final Assigned Accounts:', this.accounts);
+        this.accounts = Array.isArray(res) ? res : (res?.data ?? []);
         this.loading = false;
+        this.cdr.markForCheck();   // ← tells Angular: "re-check this component now"
+        this.cdr.detectChanges();  // ← forces immediate DOM update
       },
-      error: (err) => {
-        console.error('❌ API ERROR:', err);
-        this.error = 'Failed to connect to JSON Server (port 3005)';
+      error: (err: any) => {
+        console.error('API ERROR:', err);
+        this.error = 'Failed to load accounts from server.';
         this.loading = false;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
 
-  goToDetails(id: string) {
+  goToDetails(id: string): void {
     this.router.navigate(['/accounts', id]);
   }
 }

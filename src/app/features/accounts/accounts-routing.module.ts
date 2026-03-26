@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+// accounts-routing.module.ts
 const routes: Routes = [
   {
     path: '',
@@ -9,13 +10,13 @@ const routes: Routes = [
         .then(m => m.AccountsContainerComponent)
   },
   {
-  path: ':id',
-  loadComponent: () =>
-    import('./containers/account-details.component/account-details.component')
-      .then(m => m.AccountDetailsComponent)
-},
-  {
     path: ':id',
+    loadComponent: () =>
+      import('./containers/account-details.component/account-details.component')
+        .then(m => m.AccountDetailsComponent)
+  },
+  {
+    path: ':id/transactions',   // ← changed from ':id' to ':id/transactions'
     loadComponent: () =>
       import('./containers/transactions-container/transactions-container.component')
         .then(m => m.TransactionsContainerComponent)
