@@ -2,11 +2,12 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
+import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'app-statements-container',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TableComponent],
   templateUrl: './statements-container.component.html',
   styleUrls: ['./statements-container.component.css']
 })

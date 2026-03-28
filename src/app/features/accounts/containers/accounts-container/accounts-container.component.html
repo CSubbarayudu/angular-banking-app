@@ -1,10 +1,10 @@
 <div style="padding: 20px">
   <h2>Accounts Overview</h2>
   <ng-container *ngIf="loading">
-    <p style="color:blue">Loading accounts...</p>
+    <app-loader *ngIf="loading"></app-loader>
   </ng-container>
   <ng-container *ngIf="error">
-    <p style="color:red">{{ error }}</p>
+    <app-error-message *ngIf="error" [message]="error"></app-error-message>
   </ng-container>
   <ng-container *ngIf="!loading && accounts.length > 0">
     <table border="1" style="width:100%; border-collapse:collapse; margin-top:10px">

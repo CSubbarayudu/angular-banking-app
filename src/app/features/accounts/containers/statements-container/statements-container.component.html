@@ -1,4 +1,4 @@
-<div class="statements-page">
+            <div class="statements-page">
   <h2>Account Statement</h2>
 
   <section class="account-card" *ngIf="accountLoading || accountError || account">
@@ -25,25 +25,12 @@
       No transactions found for this account.
     </ng-container>
 
-    <table *ngIf="!transactionsLoading && !transactionsError && transactions.length">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Amount</th>
-          <th>Type</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let tx of transactions">
-          <td>{{ tx.date || '—' }}</td>
-          <td>{{ tx.description || '—' }}</td>
-          <td [ngClass]="{credit: isCredit(tx), debit: isDebit(tx)}">{{ tx.amount | currency }}</td>
-          <td>{{ tx.type || '—' }}</td>
-          <td>{{ tx.status || '—' }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <app-table
+      *ngIf="!transactionsLoading && !transactionsError && transactions.length"
+      [headers]="['Date','Description','Amount','Type','Status']"
+      [columns]="['date','description','amount','type','status']"
+      [data]="transactions"
+    >
+    </app-table>
   </section>
 </div>

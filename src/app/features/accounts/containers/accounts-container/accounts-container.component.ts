@@ -2,11 +2,13 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
+import { LoaderComponent } from '../../../shared/components/loader/loader.component';
+import { ErrorMessageComponent } from '../../../shared/components/error-message/error-message.component';
 
 @Component({
   selector: 'app-accounts-container',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoaderComponent, ErrorMessageComponent],
   templateUrl: './accounts-container.component.html'
 })
 export class AccountsContainerComponent implements OnInit {

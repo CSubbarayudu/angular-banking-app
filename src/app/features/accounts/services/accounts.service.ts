@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Account } from '../models/account.model';
+import { Transaction } from '../models/transaction.model';
 
 @Injectable({ providedIn: 'root' })
 export class AccountsService {
@@ -9,8 +11,8 @@ export class AccountsService {
 
   constructor(private http: HttpClient) {}
 
-  getAccounts(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/accounts`);
+  getAccounts(): Observable<Account[]> {
+    return this.http.get<Account[]>(`${this.baseUrl}/accounts`);
   }
 
   getTransactions(
@@ -20,7 +22,7 @@ export class AccountsService {
     filters: any,
     sortField: string,
     sortOrder: string
-  ): Observable<any[]> {
+  ): Observable<Transaction[]> {
 
     let params = new HttpParams()
       .set('accountId', accountId)
@@ -50,6 +52,6 @@ export class AccountsService {
       params = params.set('date_lte', filters.endDate);
     }
 
-    return this.http.get<any[]>(`${this.baseUrl}/transactions`, { params });
+    return this.http.get<Transaction[]>(`${this.baseUrl}/transactions`, { params });
   }
 }
