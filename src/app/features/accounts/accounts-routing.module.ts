@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { canDeactivateGuard } from '../../core/guards/can-deactivate-guard';
 
-// accounts-routing.module.ts
 const routes: Routes = [
   {
     path: '',
@@ -10,16 +10,23 @@ const routes: Routes = [
         .then(m => m.AccountsContainerComponent)
   },
   {
-    path: ':id',
+    path: ':id/statements',
     loadComponent: () =>
-      import('./containers/account-details.component/account-details.component')
-        .then(m => m.AccountDetailsComponent)
+      import('./containers/statements-container/statements-container.component')
+        .then(m => m.StatementsContainerComponent)
   },
   {
-    path: ':id/transactions',   // ← changed from ':id' to ':id/transactions'
+    path: ':id/transactions',
     loadComponent: () =>
       import('./containers/transactions-container/transactions-container.component')
         .then(m => m.TransactionsContainerComponent)
+  },
+  {
+    path: ':id',
+    canDeactivate: [canDeactivateGuard],   // ← WIRED HERE
+    loadComponent: () =>
+      import('./containers/account-details.component/account-details.component')
+        .then(m => m.AccountDetailsComponent)
   }
 ];
 
@@ -27,4 +34,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class AccountsRoutingModule { }
+export class AccountsRoutingModule {}

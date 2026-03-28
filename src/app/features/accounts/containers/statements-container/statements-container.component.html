@@ -1,0 +1,49 @@
+<div class="statements-page">
+  <h2>Account Statement</h2>
+
+  <section class="account-card" *ngIf="accountLoading || accountError || account">
+    <ng-container *ngIf="accountLoading">Loading account data...</ng-container>
+    <ng-container *ngIf="accountError" class="error">{{ accountError }}</ng-container>
+
+    <ng-container *ngIf="!accountLoading && account && !accountError">
+      <div><strong>ID:</strong> {{account.id}}</div>
+      <div><strong>Name:</strong> {{account.name || 'N/A'}}</div>
+      <div><strong>Type:</strong> {{account.type || 'N/A'}}</div>
+      <div><strong>Balance:</strong> {{account.balance | currency}}</div>
+    </ng-container>
+  </section>
+
+  <section class="actions">
+    <button class="primary" (click)="downloadCsv()" [disabled]="transactionsLoading || !transactions.length">Download Full Statement CSV</button>
+    <button (click)="goBack()">Back to Account Details</button>
+  </section>
+
+  <section class="transactions-table">
+    <ng-container *ngIf="transactionsLoading">Loading transactions...</ng-container>
+    <ng-container *ngIf="transactionsError" class="error">{{ transactionsError }}</ng-container>
+    <ng-container *ngIf="!transactionsLoading && !transactionsError && !transactions.length">
+      No transactions found for this account.
+    </ng-container>
+
+    <table *ngIf="!transactionsLoading && !transactionsError && transactions.length">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Type</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of transactions">
+          <td>{{ tx.date || '—' }}</td>
+          <td>{{ tx.description || '—' }}</td>
+          <td [ngClass]="{credit: isCredit(tx), debit: isDebit(tx)}">{{ tx.amount | currency }}</td>
+          <td>{{ tx.type || '—' }}</td>
+          <td>{{ tx.status || '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>

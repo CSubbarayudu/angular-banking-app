@@ -1,0 +1,12 @@
+.statements-page { padding: 1rem; }
+.account-card { margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 6px; padding: 0.8rem; background: #fff; }
+.actions { margin-bottom: 1rem; display: flex; gap: 0.6rem; }
+button { border: 1px solid #ccc; background: #fafafa; color: #333; border-radius: 4px; padding: 0.45rem 0.8rem; cursor: pointer; }
+button.primary { background: #007bff; color: white; border-color: #007bff; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+.error { color: #a12; }
+.transactions-table table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.transactions-table th, .transactions-table td { border: 1px solid #e0e0e0; padding: 0.45rem; text-align: left; }
+.transactions-table th { background: #f3f3f3; }
+.credit { color: green; font-weight: 600; }
+.debit { color: red; font-weight: 600; }

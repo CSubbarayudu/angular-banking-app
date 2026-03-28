@@ -23,15 +23,18 @@ export class AccountsService {
   ): Observable<any[]> {
 
     let params = new HttpParams()
-      .set('accountId', accountId)   // ← json-server v0 uses exact field name match
+      .set('accountId', accountId)
       .set('_page', page.toString())
       .set('_limit', limit.toString())
       .set('_sort', sortField)
-      .set('_order', sortOrder);     // 'asc' or 'desc'
+      .set('_order', sortOrder);
 
+    // Type filter
     if (filters?.type) {
       params = params.set('type', filters.type);
     }
+
+    // Amount range filters
     if (filters?.minAmount !== null && filters?.minAmount !== undefined) {
       params = params.set('amount_gte', filters.minAmount.toString());
     }
@@ -39,7 +42,14 @@ export class AccountsService {
       params = params.set('amount_lte', filters.maxAmount.toString());
     }
 
-    // json-server v0 always returns a plain array — no wrapping needed
+    // Date range filters (Task 2)
+    if (filters?.startDate) {
+      params = params.set('date_gte', filters.startDate);
+    }
+    if (filters?.endDate) {
+      params = params.set('date_lte', filters.endDate);
+    }
+
     return this.http.get<any[]>(`${this.baseUrl}/transactions`, { params });
   }
 }

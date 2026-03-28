@@ -21,6 +21,8 @@ export class AccountDetailsComponent implements OnInit {
   filterType = '';
   minAmount: number | null = null;
   maxAmount: number | null = null;
+  startDate: string = '';   // ← ADD THIS
+  endDate: string = '';     // ← ADD THIS
 
   page = 1;
   limit = 5;
@@ -44,7 +46,6 @@ export class AccountDetailsComponent implements OnInit {
     this.accountLoading = true;
     this.service.getAccounts().subscribe({
       next: (res: any[]) => {
-        // String comparison — URL params are always strings
         this.account = res.find((a: any) => String(a.id) === String(this.accountId)) || res[0];
         this.accountLoading = false;
         this.cdr.detectChanges();
@@ -63,7 +64,9 @@ export class AccountDetailsComponent implements OnInit {
     const filters = {
       type: this.filterType,
       minAmount: this.minAmount,
-      maxAmount: this.maxAmount
+      maxAmount: this.maxAmount,
+      startDate: this.startDate,   
+      endDate: this.endDate        
     };
 
     this.service.getTransactions(
@@ -71,7 +74,7 @@ export class AccountDetailsComponent implements OnInit {
       filters, this.sortField, this.sortOrder
     ).subscribe({
       next: (res: any) => {
-        this.transactions = res;   // service already unwraps to plain array
+        this.transactions = res;
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -87,12 +90,14 @@ export class AccountDetailsComponent implements OnInit {
   applyFilters(): void { this.page = 1; this.loadTransactions(); }
 
   clearFilters(): void {
-    this.filterType = '';
-    this.minAmount = null;
-    this.maxAmount = null;
-    this.page = 1;
-    this.loadTransactions();
-  }
+  this.filterType = '';
+  this.minAmount = null;
+  this.maxAmount = null;
+  this.startDate = '';   // ← ADD THIS
+  this.endDate = '';     // ← ADD THIS
+  this.page = 1;
+  this.loadTransactions();
+}
 
   sort(field: string): void {
     this.sortField = field;
@@ -105,6 +110,11 @@ export class AccountDetailsComponent implements OnInit {
   prevPage(): void { if (this.page > 1) { this.page--; this.loadTransactions(); } }
 
   goBack(): void { this.router.navigate(['/accounts']); }
+
+  // ← THIS is the missing method that was causing the error
+  viewStatement(): void {
+    this.router.navigate(['/accounts', this.accountId, 'statements']);
+  }
 
   downloadStatement(): void {
     if (!this.transactions.length) return;
