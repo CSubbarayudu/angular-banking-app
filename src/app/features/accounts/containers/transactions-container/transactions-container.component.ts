@@ -4,12 +4,11 @@ import { FormsModule } from '@angular/forms';
 
 import { AccountsService } from '../../services/accounts.service';
 import { Transaction } from '../../models/transaction.model';
-import { TableComponent } from '../../../../shared/components/table/table.component';
 
 @Component({
   selector: 'app-transactions-container',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './transactions-container.component.html'
 })
 export class TransactionsContainerComponent implements OnInit {
@@ -23,7 +22,7 @@ export class TransactionsContainerComponent implements OnInit {
 
   // Pagination & Sorting State
   page = 1;
-  limit = 5; 
+  limit = 5;
   sortField = 'date';
   sortOrder = 'desc';
 
@@ -34,7 +33,7 @@ export class TransactionsContainerComponent implements OnInit {
   minAmount: number | null = null;
   maxAmount: number | null = null;
 
-  constructor(private service: AccountsService) {}
+  constructor(private service: AccountsService) { }
 
   ngOnInit(): void {
     this.loadTransactions();
@@ -42,7 +41,7 @@ export class TransactionsContainerComponent implements OnInit {
 
   loadTransactions(): void {
     this.loading = true;
-    
+
     // Bundle all filters into one object to pass to the service
     const currentFilters = {
       type: this.filterType,

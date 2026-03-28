@@ -18,7 +18,7 @@ export class AccountsContainerComponent implements OnInit {
     private accountsService: AccountsService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadAccounts();
