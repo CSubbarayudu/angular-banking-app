@@ -1,18 +1,19 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AccountsService } from '../../services/accounts.service';
-import { TableComponent } from '../../../../shared/components/table/table.component';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-statements-container',
   standalone: true,
-  imports: [CommonModule, TableComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './statements-container.component.html',
   styleUrls: ['./statements-container.component.css']
 })
 export class StatementsContainerComponent implements OnInit {
-
   accountId = '';
   account: any = null;
   transactions: any[] = [];
@@ -21,6 +22,9 @@ export class StatementsContainerComponent implements OnInit {
   transactionsLoading = false;
   accountError = '';
   transactionsError = '';
+
+  selectedFromDate = '';
+  selectedToDate = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -33,6 +37,27 @@ export class StatementsContainerComponent implements OnInit {
     this.accountId = this.route.snapshot.paramMap.get('id') || '';
     this.loadAccount();
     this.loadTransactions();
+  }
+
+  get loggedInUser(): string {
+    return localStorage.getItem('loggedInUser') || 'N/A';
+  }
+
+  get filteredTransactions(): any[] {
+    if (!this.selectedFromDate && !this.selectedToDate) {
+      return this.transactions;
+    }
+
+    return this.transactions.filter(tx => {
+      if (!tx.date) return true;
+      const txDate = new Date(tx.date);
+      const from = this.selectedFromDate ? new Date(this.selectedFromDate) : null;
+      const to = this.selectedToDate ? new Date(this.selectedToDate) : null;
+
+      if (from && txDate < from) return false;
+      if (to && txDate > to) return false;
+      return true;
+    });
   }
 
   loadAccount(): void {
@@ -85,37 +110,122 @@ export class StatementsContainerComponent implements OnInit {
     return String(transaction.type).toLowerCase() === 'debit';
   }
 
-  downloadCsv(): void {
-    if (!this.transactions?.length) {
+  formatDate(date: Date | string): string {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  applyFilters(): void {
+    this.loadTransactions();
+  }
+
+  clearFilters(): void {
+    this.selectedFromDate = '';
+    this.selectedToDate = '';
+    this.loadTransactions();
+  }
+
+  downloadPDF(): void {
+    if (!this.account || !this.filteredTransactions.length) {
       return;
     }
 
-    const header = ['Date', 'Description', 'Amount', 'Type', 'Status'];
-    const rows = this.transactions.map(tx => [
-      tx.date || '',
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginLeft = 14;
+    let currentY = 20;
+
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BANK STATEMENT', pageWidth / 2, currentY, { align: 'center' });
+
+    currentY += 12;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+
+    const accountNumber = this.account.accountNumber || this.account.id || 'N/A';
+    const accountType = this.account.accountType || this.account.type || 'N/A';
+    const balanceValue = this.account.balance != null
+      ? `Rs. ${Number(this.account.balance).toFixed(2)}`
+      : 'N/A';
+    const fromDate = this.selectedFromDate || 'All';
+    const toDate = this.selectedToDate || 'All';
+    const generatedDate = this.formatDate(new Date());
+
+    const details = [
+      `Bank Name:        XYZ Bank`,
+      `Account Holder:    ${this.loggedInUser}`,
+      `Account Number:    ${accountNumber}`,
+      `Account Type:      ${accountType}`,
+      `Balance:           ${balanceValue}`,
+      `Statement Period:  ${fromDate} to ${toDate}`,
+      `Total Records:     ${this.filteredTransactions.length} transaction(s)`,
+      `Generated Date:    ${generatedDate}`
+    ];
+
+    details.forEach(line => {
+      currentY += 6;
+      doc.text(line, marginLeft, currentY);
+    });
+
+    currentY += 10;
+
+    const data = this.filteredTransactions.map(tx => [
+      tx.date ? this.formatDate(tx.date) : 'N/A',
       tx.description || '',
-      tx.amount != null ? tx.amount : '',
-      tx.type || '',
-      tx.status || ''
+      `Rs. ${Number(tx.amount || 0).toFixed(2)}`,
+      tx.type || 'N/A',
+      tx.status || 'N/A'
     ]);
 
-    const csvContent = [header, ...rows]
-      .map(row =>
-        row
-          .map(cell => '"' + String(cell).replace(/"/g, '""') + '"')
-          .join(',')
-      )
-      .join('\n');
+    const totalDebits = this.filteredTransactions
+      .filter(tx => this.isDebit(tx))
+      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `account_${this.accountId}_full_statement.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    const totalCredits = this.filteredTransactions
+      .filter(tx => this.isCredit(tx))
+      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+    const netChange = totalCredits - totalDebits;
+
+    autoTable(doc, {
+      startY: currentY,
+      head: [['Date', 'Description', 'Amount', 'Type', 'Status']],
+      body: data,
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [33, 150, 243], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      theme: 'grid',
+      margin: { left: marginLeft, right: marginLeft },
+      showHead: 'everyPage'
+    });
+
+    const finalY = (doc as any).lastAutoTable?.finalY || doc.internal.pageSize.getHeight() - 30;
+    const summaryY = finalY + 12;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SUMMARY', marginLeft, summaryY);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Total Debits:  Rs. ${totalDebits.toFixed(2)}`, marginLeft, summaryY + 8);
+    doc.text(`Total Credits: Rs. ${totalCredits.toFixed(2)}`, marginLeft, summaryY + 14);
+    doc.text(`Net Change:    Rs. ${netChange.toFixed(2)}`, marginLeft, summaryY + 20);
+
+    const timestamp = new Date().toLocaleTimeString();
+    const footerText = `End of Statement - ${generatedDate} ${timestamp}`;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.text(footerText, pageWidth / 2, doc.internal.pageSize.getHeight() - 15, { align: 'center' });
+
+    const sanitized = String(accountNumber).replace(/\s+/g, '_');
+    const fromLabel = this.selectedFromDate || 'All';
+    const toLabel = this.selectedToDate || 'All';
+    doc.save(`statement_${sanitized}_${fromLabel}_to_${toLabel}.pdf`);
   }
 
   goBack(): void {

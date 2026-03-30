@@ -1,12 +1,134 @@
-.statements-page { padding: 1rem; }
-.account-card { margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 6px; padding: 0.8rem; background: #fff; }
-.actions { margin-bottom: 1rem; display: flex; gap: 0.6rem; }
-button { border: 1px solid #ccc; background: #fafafa; color: #333; border-radius: 4px; padding: 0.45rem 0.8rem; cursor: pointer; }
-button.primary { background: #007bff; color: white; border-color: #007bff; }
-button:disabled { opacity: .5; cursor: not-allowed; }
-.error { color: #a12; }
-.transactions-table table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
-.transactions-table th, .transactions-table td { border: 1px solid #e0e0e0; padding: 0.45rem; text-align: left; }
-.transactions-table th { background: #f3f3f3; }
-.credit { color: green; font-weight: 600; }
-.debit { color: red; font-weight: 600; }
+.page-padding {
+  padding: 32px;
+}
+
+.section-title {
+  font-size: 22px;
+  color: #2d3748;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-item {
+  min-width: 150px;
+}
+
+.filter-item label {
+  display: block;
+  font-size: 13px;
+  color: #4a5568;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.filter-item input,
+.filter-item select {
+  width: 200px;
+  height: 36px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.transactions-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #ebf4ff;
+  color: #1a56db;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #2d3748;
+}
+
+tr:hover {
+  background: #f7faff;
+}
+
+.btn-primary {
+  background: #1a56db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: white;
+  color: #1a56db;
+  border: 1px solid #1a56db;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-outline {
+  background: white;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.credit-text { color: #276749; font-weight: 600; }
+.debit-text  { color: #c53030; font-weight: 600; }
+
+.pagination-row {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.text-muted { color: #718096; }
+
+.account-details-card div {
+  margin-bottom: 6px;
+}
+

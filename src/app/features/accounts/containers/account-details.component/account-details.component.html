@@ -1,160 +1,111 @@
-<div style="padding:20px; font-family:Arial,sans-serif; max-width:1000px">
+<div class="page-padding">
+  <button class="btn-outline" (click)="goBack()">← Back to Accounts</button>
 
-  <button (click)="goBack()"
-    style="margin-bottom:15px; padding:6px 16px; cursor:pointer;
-           border:1px solid #ccc; border-radius:4px; background:#f8f9fa">
-    ← Back to Accounts
-  </button>
+  <div class="card account-card">
+    <h2 class="section-title">Account Details</h2>
 
-  <h2>Account Details</h2>
+    <p *ngIf="accountLoading" class="text-muted">Loading account info...</p>
 
-  <p *ngIf="accountLoading" style="color:blue">Loading account info...</p>
-
-  <div *ngIf="account && !accountLoading"
-       style="border:1px solid #ccc; padding:15px; border-radius:6px;
-              margin-bottom:20px; background:#f9f9f9">
-    <p><b>Account No:</b> {{ account.accountNumber }}</p>
-    <p><b>Type:</b> {{ account.accountType }}</p>
-    <p><b>Balance:</b> ₹{{ account.balance }}</p>
-    <p><b>Status:</b>
-      <span [style.color]="account.status === 'Active' ? 'green' :
-                           account.status === 'Blocked' ? 'red' : 'orange'">
-        {{ account.status }}
-      </span>
-    </p>
+    <div *ngIf="account && !accountLoading" class="account-info">
+      <p><b>Account No:</b> {{ account.accountNumber }}</p>
+      <p><b>Type:</b> {{ account.accountType }}</p>
+      <p><b>Balance:</b> <span style="font-weight:700; font-size:1.4rem">₹{{ account.balance }}</span></p>
+      <p><b>Status:</b>
+        <span class="badge"
+              [ngClass]="{
+                'badge-active': account.status === 'Active',
+                'badge-inactive': account.status === 'Inactive',
+                'badge-blocked': account.status === 'Blocked'
+              }">
+          {{ account.status }}
+        </span>
+      </p>
+    </div>
   </div>
 
-  <h3>Transaction History</h3>
-
-  <!-- Filters -->
-  <div style="background:#e9ecef; padding:15px; border-radius:8px;
-              margin-bottom:20px; display:flex; flex-wrap:wrap; gap:15px; align-items:flex-end">
-
-    <div>
-      <label style="display:block; font-size:12px; font-weight:bold">Type</label>
-      <select [(ngModel)]="filterType"
-        style="padding:6px; border-radius:4px; border:1px solid #ccc">
-        <option value="">All</option>
-        <option value="Credit">Credit</option>
-        <option value="Debit">Debit</option>
-      </select>
+  <div class="card filter-card">
+    <h3 style="margin-top:0;">Transaction Filters</h3>
+    <div class="filters">
+      <div class="filter-item">
+        <label>Type</label>
+        <select [(ngModel)]="filterType">
+          <option value="">All</option>
+          <option value="Credit">Credit</option>
+          <option value="Debit">Debit</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label>Min Amount</label>
+        <input type="number" [(ngModel)]="minAmount" />
+      </div>
+      <div class="filter-item">
+        <label>Max Amount</label>
+        <input type="number" [(ngModel)]="maxAmount" />
+      </div>
+      <div class="filter-item">
+        <label>From Date</label>
+        <input type="date" [(ngModel)]="startDate" />
+      </div>
+      <div class="filter-item">
+        <label>To Date</label>
+        <input type="date" [(ngModel)]="endDate" />
+      </div>
+      <div class="filter-actions">
+        <button (click)="applyFilters()" class="btn-primary">Apply</button>
+        <button (click)="clearFilters()" class="btn-secondary">Clear</button>
+      </div>
     </div>
-
-    <div>
-      <label style="display:block; font-size:12px; font-weight:bold">Min Amount</label>
-      <input type="number" [(ngModel)]="minAmount"
-        style="padding:6px; width:100px; border-radius:4px; border:1px solid #ccc">
-    </div>
-
-    <div>
-      <label style="display:block; font-size:12px; font-weight:bold">Max Amount</label>
-      <input type="number" [(ngModel)]="maxAmount"
-        style="padding:6px; width:100px; border-radius:4px; border:1px solid #ccc">
-    </div>
-
-    <!-- ✅ Task 2 — Date Range Filter (added here) -->
-    <div>
-      <label style="display:block; font-size:12px; font-weight:bold">From Date</label>
-      <input type="date" [(ngModel)]="startDate"
-        style="padding:6px; border-radius:4px; border:1px solid #ccc">
-    </div>
-
-    <div>
-      <label style="display:block; font-size:12px; font-weight:bold">To Date</label>
-      <input type="date" [(ngModel)]="endDate"
-        style="padding:6px; border-radius:4px; border:1px solid #ccc">
-    </div>
-
-    <div style="display:flex; gap:10px">
-      <button (click)="applyFilters()"
-        style="background:#007bff; color:white; padding:6px 14px;
-               border:none; border-radius:4px; cursor:pointer">
-        Apply
-      </button>
-      <button (click)="clearFilters()"
-        style="background:#6c757d; color:white; padding:6px 14px;
-               border:none; border-radius:4px; cursor:pointer">
-        Clear
-      </button>
-    </div>
-
   </div>
 
-  <!-- Sort -->
-  <div style="margin-bottom:15px; display:flex; gap:10px">
-    <button (click)="sort('amount')"
-      style="padding:5px 12px; border:1px solid #aaa; border-radius:4px; cursor:pointer">
-      ↕ Sort by Amount
-    </button>
-    <button (click)="sort('date')"
-      style="padding:5px 12px; border:1px solid #aaa; border-radius:4px; cursor:pointer">
-      ↕ Sort by Date
-    </button>
-    <small style="align-self:center; color:#888">
-      Sorted by <b>{{ sortField }}</b> ({{ sortOrder }})
-    </small>
+  <div class="sort-row">
+    <button class="btn-outline" (click)="sort('amount')">↕ Sort by Amount</button>
+    <button class="btn-outline" (click)="sort('date')">↕ Sort by Date</button>
+    <small>Sorted by <b>{{ sortField }}</b> ({{ sortOrder }})</small>
   </div>
 
-  <p *ngIf="loading" style="color:blue">Loading transactions...</p>
+  <p *ngIf="loading" class="text-muted">Loading transactions...</p>
 
-  <!-- Transactions Table -->
   <ng-container *ngIf="!loading && transactions.length > 0">
-    <table border="1" style="width:100%; border-collapse:collapse">
-      <thead style="background:#f0f0f0">
-        <tr>
-          <th style="padding:10px; text-align:left">Date</th>
-          <th style="padding:10px; text-align:left">Description</th>
-          <th style="padding:10px; text-align:left">Amount (₹)</th>
-          <th style="padding:10px; text-align:left">Type</th>
-          <th style="padding:10px; text-align:left">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let txn of transactions">
-          <td style="padding:10px">{{ txn.date }}</td>
-          <td style="padding:10px">{{ txn.description || '-' }}</td>
-          <td style="padding:10px"
-              [style.color]="txn.type === 'Credit' ? 'green' : 'red'">
-            {{ txn.type === 'Credit' ? '+' : '-' }}₹{{ txn.amount }}
-          </td>
-          <td style="padding:10px">{{ txn.type }}</td>
-          <td style="padding:10px">{{ txn.status }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount (₹)</th>
+            <th>Type</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let txn of transactions">
+            <td>{{ txn.date }}</td>
+            <td>{{ txn.description || '-' }}</td>
+            <td class="{{ txn.type === 'Credit' ? 'credit-text' : 'debit-text' }}">{{ txn.type === 'Credit' ? '+' : '-' }}₹{{ txn.amount }}</td>
+            <td><span class="badge" [ngClass]="{ 'badge-active': txn.type === 'Credit', 'badge-failed': txn.type === 'Debit' }">{{ txn.type }}</span></td>
+            <td><span class="badge"
+                      [ngClass]="{
+                        'badge-active': txn.status === 'Completed',
+                        'badge-pending': txn.status === 'Pending',
+                        'badge-failed': txn.status === 'Failed'
+                      }">{{ txn.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
 
-    <!-- Pagination -->
-    <div style="margin-top:15px; display:flex; align-items:center; gap:15px">
-      <button (click)="prevPage()" [disabled]="page <= 1"
-        style="padding:6px 14px; border:1px solid #ccc; border-radius:4px; cursor:pointer">
-        ← Prev
-      </button>
-      <span>Page <b>{{ page }}</b></span>
-      <button (click)="nextPage()" [disabled]="transactions.length < limit"
-        style="padding:6px 14px; border:1px solid #ccc; border-radius:4px; cursor:pointer">
-        Next →
-      </button>
+      <div class="pagination-row">
+        <button class="btn-outline" (click)="prevPage()" [disabled]="page <= 1">← Prev</button>
+        <span>Page <b>{{ page }}</b></span>
+        <button class="btn-outline" (click)="nextPage()" [disabled]="transactions.length < limit">Next →</button>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn-secondary" (click)="viewStatement()">📄 View Full Statement</button>
+        <button class="btn-primary" (click)="downloadFilteredPDF()">📥 Download Filtered Statement PDF</button>
+        <button class="btn-outline" (click)="goBack()">Back</button>
+      </div>
     </div>
   </ng-container>
 
-  <!-- Empty State -->
-  <p *ngIf="!loading && transactions.length === 0"
-     style="color:#888; margin-top:10px">
-    No transactions found for selected filters.
-  </p>
-
-  <!-- Action Buttons -->
-  <div style="margin-top:25px; display:flex; gap:15px; flex-wrap:wrap">
-    <button (click)="viewStatement()"
-      style="background:#17a2b8; color:white; padding:10px 20px;
-             border:none; border-radius:5px; cursor:pointer; font-size:14px">
-      📄 View Full Statement
-    </button>
-    <button (click)="downloadStatement()" [disabled]="transactions.length === 0"
-      style="background:#28a745; color:white; padding:10px 20px;
-             border:none; border-radius:5px; cursor:pointer; font-size:14px">
-      ⬇️ Download Statement CSV
-    </button>
-  </div>
-
+  <p *ngIf="!loading && transactions.length === 0" class="text-muted">No transactions found for selected filters.</p>
 </div>

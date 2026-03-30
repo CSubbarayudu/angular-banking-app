@@ -9,7 +9,8 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
   selector: 'app-accounts-container',
   standalone: true,
   imports: [CommonModule, LoaderComponent, ErrorMessageComponent],
-  templateUrl: './accounts-container.component.html'
+  templateUrl: './accounts-container.component.html',
+  styleUrls: ['./accounts-container.component.css']
 })
 export class AccountsContainerComponent implements OnInit {
   accounts: any[] = [];

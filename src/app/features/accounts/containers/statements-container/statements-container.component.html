@@ -1,36 +1,102 @@
-            <div class="statements-page">
-  <h2>Account Statement</h2>
+<div class="page-container">
 
-  <section class="account-card" *ngIf="accountLoading || accountError || account">
-    <ng-container *ngIf="accountLoading">Loading account data...</ng-container>
-    <ng-container *ngIf="accountError" class="error">{{ accountError }}</ng-container>
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2 class="page-title">Account Statement</h2>
+    <button class="btn-outline" (click)="goBack()">← Back</button>
+  </div>
 
-    <ng-container *ngIf="!accountLoading && account && !accountError">
-      <div><strong>ID:</strong> {{account.id}}</div>
-      <div><strong>Name:</strong> {{account.name || 'N/A'}}</div>
-      <div><strong>Type:</strong> {{account.type || 'N/A'}}</div>
-      <div><strong>Balance:</strong> {{account.balance | currency}}</div>
-    </ng-container>
-  </section>
+  <!-- Loading / Error -->
+  <div *ngIf="accountLoading || transactionsLoading" class="loading-msg">Loading...</div>
+  <div *ngIf="accountError" class="error-msg">{{ accountError }}</div>
+  <div *ngIf="transactionsError" class="error-msg">{{ transactionsError }}</div>
 
-  <section class="actions">
-    <button class="primary" (click)="downloadCsv()" [disabled]="transactionsLoading || !transactions.length">Download Full Statement CSV</button>
-    <button (click)="goBack()">Back to Account Details</button>
-  </section>
+  <!-- Account Info Card -->
+  <div class="card account-info-card" *ngIf="account">
+    <div class="account-info-row">
+      <div class="info-item">
+        <span class="info-label">Account Number</span>
+        <span class="info-value">{{ account.accountNumber || account.id }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Account Type</span>
+        <span class="info-value">{{ account.accountType || account.type }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Balance</span>
+        <span class="info-value balance-value">Rs. {{ account.balance | number:'1.2-2' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Account Holder</span>
+        <span class="info-value">{{ loggedInUser }}</span>
+      </div>
+    </div>
+  </div>
 
-  <section class="transactions-table">
-    <ng-container *ngIf="transactionsLoading">Loading transactions...</ng-container>
-    <ng-container *ngIf="transactionsError" class="error">{{ transactionsError }}</ng-container>
-    <ng-container *ngIf="!transactionsLoading && !transactionsError && !transactions.length">
-      No transactions found for this account.
-    </ng-container>
+  <!-- Date Filter Card -->
+  <div class="card filter-card">
+    <h3 class="filter-title">Filter by Date Range</h3>
+    <div class="filter-row">
+      <div class="filter-field">
+        <label>From Date</label>
+        <input type="date" [(ngModel)]="selectedFromDate" />
+      </div>
+      <div class="filter-field">
+        <label>To Date</label>
+        <input type="date" [(ngModel)]="selectedToDate" />
+      </div>
+      <div class="filter-actions">
+        <button class="btn-primary" (click)="applyFilters()">Apply Filter</button>
+        <button class="btn-outline" (click)="clearFilters()">Clear</button>
+      </div>
+    </div>
+    <div class="filter-summary" *ngIf="filteredTransactions.length > 0">
+      Showing <strong>{{ filteredTransactions.length }}</strong> transaction(s)
+    </div>
+    <div class="no-data-msg" *ngIf="filteredTransactions.length === 0 && !transactionsLoading">
+      No transactions found for the selected date range.
+    </div>
+  </div>
 
-    <app-table
-      *ngIf="!transactionsLoading && !transactionsError && transactions.length"
-      [headers]="['Date','Description','Amount','Type','Status']"
-      [columns]="['date','description','amount','type','status']"
-      [data]="transactions"
-    >
-    </app-table>
-  </section>
+  <!-- Transactions Table -->
+  <div class="card table-card" *ngIf="filteredTransactions.length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Type</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of filteredTransactions">
+          <td>{{ tx.date | date:'dd/MM/yyyy' }}</td>
+          <td>{{ tx.description }}</td>
+          <td>Rs. {{ tx.amount | number:'1.2-2' }}</td>
+          <td>
+            <span [ngClass]="isCredit(tx) ? 'badge-credit' : 'badge-debit'">
+              {{ tx.type }}
+            </span>
+          </td>
+          <td>
+            <span [ngClass]="{
+              'badge-active':   tx.status === 'Completed',
+              'badge-inactive': tx.status === 'Pending',
+              'badge-blocked':  tx.status === 'Failed'
+            }">{{ tx.status }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Download Button -->
+  <div class="action-row" *ngIf="filteredTransactions.length > 0">
+    <button class="btn-primary btn-download" (click)="downloadPDF()">
+      ⬇ Download PDF Statement
+    </button>
+  </div>
+
 </div>
