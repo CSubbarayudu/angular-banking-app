@@ -1,0 +1,55 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>Banking Portal</h1>
+    <p class="subtitle">Sign in to your account</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Username Field -->
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          placeholder="Enter your username"
+          class="form-control"
+        />
+        <small class="text-error" *ngIf="loginForm.get('username')?.invalid && isSubmitted">
+          Username is required
+        </small>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Enter your password"
+          class="form-control"
+        />
+        <small class="text-error" *ngIf="loginForm.get('password')?.invalid && isSubmitted">
+          Password is required
+        </small>
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-message" *ngIf="errorMessage">
+        <p>{{ errorMessage }}</p>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="login-button" [disabled]="loginForm.invalid && isSubmitted">
+        Sign In
+      </button>
+    </form>
+
+    <!-- Demo Credentials Info -->
+    <div class="demo-info">
+      <p><strong>Demo Credentials:</strong></p>
+      <p>Username: <code>admin</code> | Password: <code>admin123</code></p>
+      <p>Username: <code>user</code> | Password: <code>user123</code></p>
+    </div>
+  </div>
+</div>
