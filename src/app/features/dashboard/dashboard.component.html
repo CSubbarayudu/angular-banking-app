@@ -1,0 +1,100 @@
+<div class="dashboard-container">
+  <!-- Error State -->
+  <div class="error-card" *ngIf="errorMsg">
+    <p>{{ errorMsg }}</p>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <p>Loading your dashboard...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading && !errorMsg">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+      <div class="greeting">
+        <h2>{{ getGreeting() }}, {{ fullName }} 👋</h2>
+        <p>Here is your financial summary for today</p>
+      </div>
+      <button class="btn-primary" (click)="goToAccounts()">
+        View All Accounts
+      </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <!-- Total Balance Card -->
+      <div class="summary-card balance-card">
+        <div class="card-icon">₹</div>
+        <div class="card-label">Total Balance</div>
+        <div class="amount">{{ totalBalance | currency:'INR':'symbol':'1.0-0' }}</div>
+        <div class="card-sublabel">Across all accounts</div>
+      </div>
+
+      <!-- Total Credit Card -->
+      <div class="summary-card credit-card">
+        <div class="card-icon">+</div>
+        <div class="card-label">Total Credit</div>
+        <div class="amount">{{ totalCredit | currency:'INR':'symbol':'1.0-0' }}</div>
+        <div class="card-sublabel">Total received</div>
+      </div>
+
+      <!-- Total Debit Card -->
+      <div class="summary-card debit-card">
+        <div class="card-icon">−</div>
+        <div class="card-label">Total Debit</div>
+        <div class="amount">{{ totalDebit | currency:'INR':'symbol':'1.0-0' }}</div>
+        <div class="card-sublabel">Total spent</div>
+      </div>
+    </div>
+
+    <!-- Accounts Section -->
+    <div class="accounts-section">
+      <div class="section-header">
+        <h3 class="section-title">Your Accounts</h3>
+      </div>
+      <div class="account-cards-grid">
+        <div class="account-card" *ngFor="let account of accounts">
+          <div class="acc-type">🏦 {{ account.accountType }}</div>
+          <div class="acc-number">••••{{ account.accountNumber.slice(-4) }}</div>
+          <div class="acc-balance">{{ account.balance | currency:'INR':'symbol':'1.0-0' }}</div>
+          <button class="view-details-btn" (click)="goToAccountDetails(account.id)">
+            View Details →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Transactions Section -->
+    <div class="transactions-section">
+      <div class="section-header">
+        <h3 class="section-title">Recent Transactions</h3>
+        <a class="view-all-link" (click)="goToAccounts()">View All →</a>
+      </div>
+
+      <div class="transactions-list" *ngIf="recentTransactions.length > 0">
+        <div
+          class="transaction-row"
+          *ngFor="let transaction of recentTransactions; let last = last"
+          [class.last-row]="last"
+        >
+          <div class="tx-description">{{ transaction.description }}</div>
+          <div class="tx-account">••••{{ transaction.accountNumber.slice(-4) }}</div>
+          <div
+            class="tx-amount"
+            [class.credit]="transaction.type === 'Credit'"
+            [class.debit]="transaction.type === 'Debit'"
+          >
+            {{ transaction.type === 'Credit' ? '+' : '−' }}{{ transaction.amount | currency:'INR':'symbol':'1.0-0' }}
+          </div>
+          <div class="tx-date">{{ transaction.date }}</div>
+        </div>
+      </div>
+
+      <div class="no-transactions" *ngIf="recentTransactions.length === 0">
+        <p>No transactions found</p>
+      </div>
+    </div>
+  </div>
+</div>

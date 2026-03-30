@@ -1,22 +1,23 @@
 <div class="login-container">
   <div class="login-card">
-    <h1>Banking Portal</h1>
-    <p class="subtitle">Sign in to your account</p>
+    <div class="login-header">
+      <h1>🏦 SecureBank</h1>
+      <p class="subtitle">Personal Banking Portal</p>
+    </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <form (ngSubmit)="onLogin()" class="login-form">
       <!-- Username Field -->
       <div class="form-group">
         <label for="username">Username</label>
         <input
           id="username"
           type="text"
-          formControlName="username"
+          [(ngModel)]="username"
+          name="username"
           placeholder="Enter your username"
           class="form-control"
+          autocomplete="username"
         />
-        <small class="text-error" *ngIf="loginForm.get('username')?.invalid && isSubmitted">
-          Username is required
-        </small>
       </div>
 
       <!-- Password Field -->
@@ -25,31 +26,29 @@
         <input
           id="password"
           type="password"
-          formControlName="password"
+          [(ngModel)]="password"
+          name="password"
           placeholder="Enter your password"
           class="form-control"
+          (keyup.enter)="onLogin()"
+          autocomplete="current-password"
         />
-        <small class="text-error" *ngIf="loginForm.get('password')?.invalid && isSubmitted">
-          Password is required
-        </small>
       </div>
 
       <!-- Error Message -->
-      <div class="error-message" *ngIf="errorMessage">
-        <p>{{ errorMessage }}</p>
+      <div class="login-error" *ngIf="errorMessage && !isLoading">
+        <span>⚠️ {{ errorMessage }}</span>
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" class="login-button" [disabled]="loginForm.invalid && isSubmitted">
-        Sign In
+      <button
+        type="submit"
+        class="login-btn"
+        [disabled]="isLoading"
+        (click)="onLogin()">
+        <span *ngIf="!isLoading">Login →</span>
+        <span *ngIf="isLoading">⏳ Verifying...</span>
       </button>
     </form>
-
-    <!-- Demo Credentials Info -->
-    <div class="demo-info">
-      <p><strong>Demo Credentials:</strong></p>
-      <p>Username: <code>admin</code> | Password: <code>admin123</code></p>
-      <p>Username: <code>user</code> | Password: <code>user123</code></p>
-    </div>
   </div>
 </div>

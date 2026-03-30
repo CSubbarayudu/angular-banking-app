@@ -1,2 +1,22 @@
-<app-navbar></app-navbar>
-<router-outlet></router-outlet>
+<div class="app-layout">
+
+  <app-navbar *ngIf="!isLoginPage"></app-navbar>
+
+  <div class="main-wrapper" [class.full-width]="isLoginPage">
+
+    <div class="top-bar" *ngIf="!isLoginPage">
+      <div class="top-bar-left">
+        <span class="top-bar-title">🏦 SecureBank</span>
+      </div>
+      <div class="top-bar-right">
+        <span class="top-bar-badge">Personal Banking Portal</span>
+      </div>
+    </div>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

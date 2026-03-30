@@ -92,21 +92,94 @@ textarea:focus {
 
 .badge {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 12px;
+  padding: 3px 10px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
-.badge-active { color: #276749; background: #c6f6d5; }
-.badge-inactive { color: #744210; background: #fefcbf; }
-.badge-blocked { color: #742a2a; background: #fed7d7; }
-.badge-completed { color: #276749; background: #c6f6d5; }
-.badge-failed { color: #742a2a; background: #fed7d7; }
-.badge-pending { color: #744210; background: #fefcbf; }
+.badge-active {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
 
-.credit-text { color: #276749; font-weight: 600; }
-.debit-text  { color: #c53030; font-weight: 600; }
+.badge-inactive {
+  background: #fffbeb;
+  color: #92400e;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-blocked {
+  background: #fff1f2;
+  color: #9f1239;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-completed {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-failed {
+  background: #fff1f2;
+  color: #9f1239;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-pending {
+  background: #fffbeb;
+  color: #92400e;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-credit {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-debit {
+  background: #fff1f2;
+  color: #9f1239;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.credit-text { color: #059669; font-weight: 600; }
+.debit-text  { color: #dc2626; font-weight: 600; }
 
 .text-primary { color: #1a56db; }
 .text-muted   { color: #718096; }
@@ -114,3 +187,242 @@ textarea:focus {
 .page-padding { padding: 32px; }
 
 .section-title { color: #2d3748; font-weight: 700; }
+
+/* ===== GLOBAL POLISH UTILITIES ===== */
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Badge Variants */
+.badge-success {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-danger {
+  background: #fff1f2;
+  color: #9f1239;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-warning {
+  background: #fffbeb;
+  color: #92400e;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* Card Variants */
+.card-primary {
+  border-left: 4px solid #1a56db;
+}
+
+.card-success {
+  border-left: 4px solid #057a55;
+}
+
+.card-danger {
+  border-left: 4px solid #c81e1e;
+}
+
+.card-warning {
+  border-left: 4px solid #d97706;
+}
+
+.card-subtle {
+  background: #f9fafb;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Selection Color */
+::selection {
+  background: #1a56db;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: #1a56db;
+  color: #ffffff;
+}
+
+/* Utility Classes */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.gap-1 { gap: 8px; }
+.gap-2 { gap: 16px; }
+.gap-3 { gap: 24px; }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Global Typography System ── */
+body {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #111928;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  line-height: 1.3;
+  color: #111928;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+/* Page title pattern (used across all pages) */
+.page-title {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: #111928 !important;
+  letter-spacing: -0.01em;
+}
+
+/* Subtitle / subtext pattern */
+.page-subtitle {
+  font-size: 13px !important;
+  color: #6b7280 !important;
+  margin-top: 2px !important;
+}
+
+/* Section titles inside cards */
+.section-title, .card-section-title {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #111928 !important;
+}
+
+/* Label above inputs or info items */
+.info-label, .meta-label, .filter-label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #9ca3af !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+
+/* Value below labels */
+.info-value, .meta-value {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #111928 !important;
+}
+
+/* Table headers */
+th {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #6b7280 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Table data cells */
+td {
+  font-size: 14px !important;
+  color: #374151 !important;
+}
+
+/* Amount values (credit/debit) */
+.amount-credit {
+  color: #059669 !important;
+  font-weight: 600 !important;
+}
+
+.amount-debit {
+  color: #dc2626 !important;
+  font-weight: 600 !important;
+}
+
+/* Balance highlights across all pages */
+.balance-text, .balance-highlight {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #1a56db !important;
+}
+
+/* Greeting text on dashboard */
+.greeting h2 {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  color: #111928 !important;
+}
+
+.greeting p {
+  font-size: 13px !important;
+  color: #6b7280 !important;
+}
+
+/* ── Smooth transitions on all interactive elements ── */
+button, a, input, select {
+  transition: all 0.15s ease;
+}
+
+/* ── Focus ring for accessibility ── */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #1a56db;
+  outline-offset: 2px;
+}

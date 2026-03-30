@@ -231,4 +231,16 @@ export class StatementsContainerComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/accounts', this.accountId]);
   }
+
+  getTotalCredits(): number {
+    return (this.filteredTransactions || this.transactions || [])
+      .filter((t: any) => t.type === 'Credit')
+      .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+  }
+
+  getTotalDebits(): number {
+    return (this.filteredTransactions || this.transactions || [])
+      .filter((t: any) => t.type === 'Debit')
+      .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+  }
 }

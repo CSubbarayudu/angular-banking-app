@@ -1,61 +1,77 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  loginForm: FormGroup;
-  errorMessage: string = '';
-  isSubmitted: boolean = false;
-
-  // Hardcoded credentials
-  private readonly validCredentials = [
-    { username: 'admin', password: 'admin123' },
-    { username: 'user', password: 'user123' }
-  ];
+  username = '';
+  password = '';
+  isLoading = false;
+  errorMessage = '';
 
   constructor(
-    private formBuilder: FormBuilder,
-    private router: Router
-  ) {
-    this.loginForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required]]
-    });
-  }
+    private http: HttpClient,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
-  onSubmit(): void {
-    this.isSubmitted = true;
-    this.errorMessage = '';
-
-    if (this.loginForm.invalid) {
+  onLogin(): void {
+    // Instant client-side validation
+    if (!this.username || !this.username.trim()) {
+      this.errorMessage = 'Please enter your username.';
       return;
     }
-
-    const { username, password } = this.loginForm.value;
-
-    // Check against hardcoded credentials
-    const isValidUser = this.validCredentials.some(
-      cred => cred.username === username && cred.password === password
-    );
-
-    if (isValidUser) {
-      // Save to localStorage
-      localStorage.setItem('authToken', 'mock-token-12345');
-      localStorage.setItem('loggedInUser', username);
-
-      // Navigate to dashboard
-      this.router.navigate(['/dashboard']);
-    } else {
-      // Show error message
-      this.errorMessage = 'Invalid credentials. Please try again.';
+    if (!this.password || !this.password.trim()) {
+      this.errorMessage = 'Please enter your password.';
+      return;
     }
+    this.errorMessage = '';
+
+    // Show loading
+    this.isLoading = true;
+    this.cdr.detectChanges();
+
+    // Query db.json users array
+    this.http.get<any[]>(
+      `http://localhost:3005/users?username=${this.username.trim()}`
+    ).subscribe({
+      next: (users) => {
+        this.isLoading = false;
+
+        const user = users.find(
+          u => u.username === this.username.trim()
+            && u.password === this.password
+        );
+
+        if (user) {
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('authToken', 'Bearer ' + user.id);
+            localStorage.setItem('loggedInUser', user.username);
+            localStorage.setItem('fullName', user.fullName);
+          }
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.isLoading = false;
+          this.errorMessage = 'Invalid username or password. Please try again.';
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.status === 0
+          ? 'Cannot connect to server. Ensure json-server is running on port 3005.'
+          : 'Login failed. Please try again.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

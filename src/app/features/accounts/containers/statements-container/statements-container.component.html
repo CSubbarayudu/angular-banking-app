@@ -1,102 +1,156 @@
-<div class="page-container">
+<div class="statements-page">
 
   <!-- Page Header -->
   <div class="page-header">
-    <h2 class="page-title">Account Statement</h2>
-    <button class="btn-outline" (click)="goBack()">← Back</button>
-  </div>
-
-  <!-- Loading / Error -->
-  <div *ngIf="accountLoading || transactionsLoading" class="loading-msg">Loading...</div>
-  <div *ngIf="accountError" class="error-msg">{{ accountError }}</div>
-  <div *ngIf="transactionsError" class="error-msg">{{ transactionsError }}</div>
-
-  <!-- Account Info Card -->
-  <div class="card account-info-card" *ngIf="account">
-    <div class="account-info-row">
-      <div class="info-item">
-        <span class="info-label">Account Number</span>
-        <span class="info-value">{{ account.accountNumber || account.id }}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Account Type</span>
-        <span class="info-value">{{ account.accountType || account.type }}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Balance</span>
-        <span class="info-value balance-value">Rs. {{ account.balance | number:'1.2-2' }}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Account Holder</span>
-        <span class="info-value">{{ loggedInUser }}</span>
-      </div>
+    <div>
+      <h2 class="page-title">Account Statement</h2>
+      <p class="page-subtitle">View and download your transaction history</p>
     </div>
-  </div>
-
-  <!-- Date Filter Card -->
-  <div class="card filter-card">
-    <h3 class="filter-title">Filter by Date Range</h3>
-    <div class="filter-row">
-      <div class="filter-field">
-        <label>From Date</label>
-        <input type="date" [(ngModel)]="selectedFromDate" />
-      </div>
-      <div class="filter-field">
-        <label>To Date</label>
-        <input type="date" [(ngModel)]="selectedToDate" />
-      </div>
-      <div class="filter-actions">
-        <button class="btn-primary" (click)="applyFilters()">Apply Filter</button>
-        <button class="btn-outline" (click)="clearFilters()">Clear</button>
-      </div>
-    </div>
-    <div class="filter-summary" *ngIf="filteredTransactions.length > 0">
-      Showing <strong>{{ filteredTransactions.length }}</strong> transaction(s)
-    </div>
-    <div class="no-data-msg" *ngIf="filteredTransactions.length === 0 && !transactionsLoading">
-      No transactions found for the selected date range.
-    </div>
-  </div>
-
-  <!-- Transactions Table -->
-  <div class="card table-card" *ngIf="filteredTransactions.length > 0">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Amount</th>
-          <th>Type</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let tx of filteredTransactions">
-          <td>{{ tx.date | date:'dd/MM/yyyy' }}</td>
-          <td>{{ tx.description }}</td>
-          <td>Rs. {{ tx.amount | number:'1.2-2' }}</td>
-          <td>
-            <span [ngClass]="isCredit(tx) ? 'badge-credit' : 'badge-debit'">
-              {{ tx.type }}
-            </span>
-          </td>
-          <td>
-            <span [ngClass]="{
-              'badge-active':   tx.status === 'Completed',
-              'badge-inactive': tx.status === 'Pending',
-              'badge-blocked':  tx.status === 'Failed'
-            }">{{ tx.status }}</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Download Button -->
-  <div class="action-row" *ngIf="filteredTransactions.length > 0">
-    <button class="btn-primary btn-download" (click)="downloadPDF()">
-      ⬇ Download PDF Statement
+    <button class="btn-outline" (click)="goBack()">
+      ← Back to Account Details
     </button>
   </div>
 
+  <!-- Loading State -->
+  <div *ngIf="accountLoading || transactionsLoading" class="loading-state">
+    <p>Loading your statement...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="(accountError || transactionsError) && !accountLoading && !transactionsLoading" class="error-card">
+    {{ accountError || transactionsError }}
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!accountLoading && !transactionsLoading && !accountError && !transactionsError">
+
+    <!-- Account Info Card -->
+    <div class="info-card" *ngIf="account">
+      <div class="account-meta">
+        <div class="meta-item">
+          <span class="meta-label">Account Number</span>
+          <span class="meta-value">
+            •••• {{ account?.accountNumber?.slice(-4) }}
+          </span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Account Type</span>
+          <span class="meta-value">{{ account?.accountType }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <span class="badge-active">● {{ account?.status }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Current Balance</span>
+          <span class="meta-value balance-text">
+            {{ account?.balance | currency:'INR':'symbol':'1.0-0' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date Filter Card -->
+    <div class="filter-card">
+      <h3 class="card-section-title">Filter by Date Range</h3>
+      <div class="filter-row">
+        <div class="filter-field">
+          <label class="filter-label">From Date</label>
+          <input type="date" class="filter-input"
+                 [(ngModel)]="selectedFromDate" />
+        </div>
+        <div class="filter-field">
+          <label class="filter-label">To Date</label>
+          <input type="date" class="filter-input"
+                 [(ngModel)]="selectedToDate" />
+        </div>
+        <div class="filter-actions">
+          <button class="btn-primary" (click)="applyFilters()">
+            Apply Filter
+          </button>
+          <button class="btn-secondary" (click)="clearFilters()">
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Bar -->
+    <div class="summary-bar" *ngIf="filteredTransactions.length > 0">
+      <div class="summary-item">
+        <span class="summary-label">Total Transactions</span>
+        <span class="summary-value">
+          {{ filteredTransactions.length }}
+        </span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Total Credits</span>
+        <span class="summary-value credit-text">
+          +{{ getTotalCredits() | currency:'INR':'symbol':'1.0-0' }}
+        </span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Total Debits</span>
+        <span class="summary-value debit-text">
+          -{{ getTotalDebits() | currency:'INR':'symbol':'1.0-0' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Transactions Table Card -->
+    <div class="table-card">
+
+      <!-- Empty State -->
+      <div *ngIf="filteredTransactions.length === 0"
+           class="empty-state">
+        <p>No transactions found for the selected period.</p>
+      </div>
+
+      <!-- Table -->
+      <table *ngIf="filteredTransactions.length > 0"
+             class="stmt-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let txn of filteredTransactions">
+            <td class="td-date">{{ txn.date | date:'dd MMM yyyy' }}</td>
+            <td class="td-desc">{{ txn.description }}</td>
+            <td>
+              <span [ngClass]="txn.type === 'Credit'
+                ? 'badge-credit' : 'badge-debit'">
+                {{ txn.type }}
+              </span>
+            </td>
+            <td [ngClass]="txn.type === 'Credit'
+                  ? 'amount-credit' : 'amount-debit'">
+              {{ txn.type === 'Credit' ? '+' : '-' }}
+              {{ txn.amount | currency:'INR':'symbol':'1.0-0' }}
+            </td>
+            <td>
+              <span [ngClass]="txn.status === 'Completed'
+                ? 'badge-active' : txn.status === 'Pending'
+                ? 'badge-inactive' : 'badge-blocked'">
+                {{ txn.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Download Button -->
+    <div class="download-section">
+      <button class="btn-download" (click)="downloadPDF()">
+        📥 Download PDF Statement
+      </button>
+    </div>
+
+  </div>
 </div>

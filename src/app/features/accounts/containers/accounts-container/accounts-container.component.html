@@ -1,51 +1,84 @@
-<div class="page-padding">
-  <h2 class="section-title" style="font-size: 22px; margin-bottom: 20px;">Accounts Overview</h2>
+<div class="accounts-page">
 
-  <ng-container *ngIf="loading">
-    <app-loader *ngIf="loading"></app-loader>
-  </ng-container>
-
-  <ng-container *ngIf="error">
-    <app-error-message *ngIf="error" [message]="error"></app-error-message>
-  </ng-container>
-
-  <ng-container *ngIf="!loading && accounts.length > 0">
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Account No</th>
-            <th>Type</th>
-            <th>Balance</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let acc of accounts">
-            <td>{{ acc.accountNumber }}</td>
-            <td>{{ acc.accountType }}</td>
-            <td>₹{{ acc.balance }}</td>
-            <td>
-              <span class="badge"
-                    [ngClass]="{
-                      'badge-active': acc.status === 'Active',
-                      'badge-inactive': acc.status === 'Inactive',
-                      'badge-blocked': acc.status === 'Blocked'
-                    }">
-                {{ acc.status }}
-              </span>
-            </td>
-            <td>
-              <button class="btn-view" (click)="goToDetails(acc.id)">View</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">My Accounts</h2>
+      <p class="page-subtitle">Manage and view your personal bank accounts</p>
     </div>
-  </ng-container>
+    <button class="btn-outline" (click)="router.navigate(['/dashboard'])">
+      ← Back to Dashboard
+    </button>
+  </div>
 
-  <ng-container *ngIf="!loading && accounts.length === 0 && !error">
-    <p>No accounts found.</p>
-  </ng-container>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <p>Loading your accounts...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMsg && !isLoading" class="error-state">
+    {{ errorMsg }}
+  </div>
+
+  <!-- Accounts List -->
+  <div class="accounts-list" *ngIf="!isLoading && !errorMsg">
+
+    <!-- Empty State -->
+    <div *ngIf="accounts.length === 0" class="empty-state">
+      <p>No accounts found for your profile.</p>
+    </div>
+
+    <!-- Account Card -->
+    <div class="account-card" *ngFor="let account of accounts">
+
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="card-title">
+          <span class="acc-icon">{{ getAccountIcon(account.accountType) }}</span>
+          <span class="acc-type">{{ account.accountType }} Account</span>
+        </div>
+        <span [ngClass]="getStatusClass(account.status)" class="status-badge">
+          ● {{ account.status }}
+        </span>
+      </div>
+
+      <!-- Card Divider -->
+      <hr class="card-divider" />
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <div class="card-info-grid">
+          <div class="info-item">
+            <span class="info-label">Account Number</span>
+            <span class="info-value">{{ getMaskedNumber(account.accountNumber) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Available Balance</span>
+            <span class="info-value balance-highlight">
+              {{ account.balance | currency:'INR':'symbol':'1.0-0' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">IFSC Code</span>
+            <span class="info-value">{{ account.ifscCode || 'N/A' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Branch</span>
+            <span class="info-value">{{ account.branch || 'N/A' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="card-footer">
+        <button class="btn-view-details" (click)="goToDetails(account.id)">
+          View Details & Transactions →
+        </button>
+      </div>
+
+    </div>
+    <!-- End *ngFor -->
+
+  </div>
 </div>
