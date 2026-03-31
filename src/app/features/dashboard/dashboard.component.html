@@ -1,13 +1,9 @@
 <div class="dashboard-container">
   <!-- Error State -->
-  <div class="error-card" *ngIf="errorMsg">
-    <p>{{ errorMsg }}</p>
-  </div>
+  <app-error-message *ngIf="errorMsg && !isLoading" [message]="errorMsg"></app-error-message>
 
   <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading">
-    <p>Loading your dashboard...</p>
-  </div>
+  <app-loader *ngIf="isLoading"></app-loader>
 
   <!-- Content -->
   <div *ngIf="!isLoading && !errorMsg">
@@ -74,18 +70,12 @@
       </div>
 
       <div class="transactions-list" *ngIf="recentTransactions.length > 0">
-        <div
-          class="transaction-row"
-          *ngFor="let transaction of recentTransactions; let last = last"
-          [class.last-row]="last"
-        >
+        <div class="transaction-row" *ngFor="let transaction of recentTransactions; let last = last"
+          [class.last-row]="last">
           <div class="tx-description">{{ transaction.description }}</div>
           <div class="tx-account">••••{{ transaction.accountNumber.slice(-4) }}</div>
-          <div
-            class="tx-amount"
-            [class.credit]="transaction.type === 'Credit'"
-            [class.debit]="transaction.type === 'Debit'"
-          >
+          <div class="tx-amount" [class.credit]="transaction.type === 'Credit'"
+            [class.debit]="transaction.type === 'Debit'">
             {{ transaction.type === 'Credit' ? '+' : '−' }}{{ transaction.amount | currency:'INR':'symbol':'1.0-0' }}
           </div>
           <div class="tx-date">{{ transaction.date }}</div>

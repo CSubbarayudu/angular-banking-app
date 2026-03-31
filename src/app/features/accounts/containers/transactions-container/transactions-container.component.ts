@@ -4,11 +4,14 @@ import { FormsModule } from '@angular/forms';
 
 import { AccountsService } from '../../services/accounts.service';
 import { Transaction } from '../../models/transaction.model';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
 
 @Component({
   selector: 'app-transactions-container',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TableComponent, LoaderComponent, ErrorMessageComponent],
   templateUrl: './transactions-container.component.html'
 })
 export class TransactionsContainerComponent implements OnInit {

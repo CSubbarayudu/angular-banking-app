@@ -4,11 +4,13 @@ import { RouterModule } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../accounts/services/accounts.service';
+import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { ErrorMessageComponent } from '../../shared/components/error-message/error-message.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CurrencyPipe],
+  imports: [CommonModule, RouterModule, CurrencyPipe, LoaderComponent, ErrorMessageComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -32,7 +34,7 @@ export class DashboardComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {

@@ -1,1 +1,9 @@
-<p>transactions-container works!</p>
+<div class="transactions-page">
+    <h1>Transaction History</h1>
+
+    <app-loader *ngIf="loading"></app-loader>
+
+    <app-error-message *ngIf="error" [message]="error"></app-error-message>
+
+    <app-table *ngIf="!loading && !error" [headers]="headers" [data]="transactions" [columns]="columns"></app-table>
+</div>

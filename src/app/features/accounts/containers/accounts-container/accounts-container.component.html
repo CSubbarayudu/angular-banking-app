@@ -12,14 +12,10 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-state">
-    <p>Loading your accounts...</p>
-  </div>
+  <app-loader *ngIf="isLoading"></app-loader>
 
   <!-- Error State -->
-  <div *ngIf="errorMsg && !isLoading" class="error-state">
-    {{ errorMsg }}
-  </div>
+  <app-error-message *ngIf="errorMsg && !isLoading" [message]="errorMsg"></app-error-message>
 
   <!-- Accounts List -->
   <div class="accounts-list" *ngIf="!isLoading && !errorMsg">

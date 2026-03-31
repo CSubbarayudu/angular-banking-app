@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AccountsService } from '../../services/accounts.service';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-account-details',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoaderComponent],
   templateUrl: './account-details.component.html',
   styleUrls: ['./account-details.component.css']
 })
@@ -21,14 +23,14 @@ export class AccountDetailsComponent implements OnInit {
   loading = false;
   accountLoading = false;
 
-  filterType   = '';
+  filterType = '';
   minAmount: number | null = null;
   maxAmount: number | null = null;
-  startDate    = '';
-  endDate      = '';
+  startDate = '';
+  endDate = '';
 
-  page      = 1;
-  limit     = 5;
+  page = 1;
+  limit = 5;
   sortField = 'date';
   sortOrder = 'desc';
 
@@ -37,7 +39,7 @@ export class AccountDetailsComponent implements OnInit {
     private router: Router,
     private service: AccountsService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.accountId = this.route.snapshot.paramMap.get('id') || '1';
@@ -65,11 +67,11 @@ export class AccountDetailsComponent implements OnInit {
     this.cdr.detectChanges();
 
     const filters = {
-      type:      this.filterType,
+      type: this.filterType,
       minAmount: this.minAmount,
       maxAmount: this.maxAmount,
       startDate: this.startDate,
-      endDate:   this.endDate
+      endDate: this.endDate
     };
 
     this.service.getTransactions(
@@ -94,11 +96,11 @@ export class AccountDetailsComponent implements OnInit {
 
   clearFilters(): void {
     this.filterType = '';
-    this.minAmount  = null;
-    this.maxAmount  = null;
-    this.startDate  = '';
-    this.endDate    = '';
-    this.page       = 1;
+    this.minAmount = null;
+    this.maxAmount = null;
+    this.startDate = '';
+    this.endDate = '';
+    this.page = 1;
     this.loadTransactions();
   }
 
@@ -125,11 +127,11 @@ export class AccountDetailsComponent implements OnInit {
     if (!this.account) return;
 
     const filters = {
-      type:      this.filterType,
+      type: this.filterType,
       minAmount: this.minAmount,
       maxAmount: this.maxAmount,
       startDate: this.startDate,
-      endDate:   this.endDate
+      endDate: this.endDate
     };
 
     // Fetch all filtered results (not just current page) with limit=100
@@ -151,10 +153,10 @@ export class AccountDetailsComponent implements OnInit {
   }
 
   private generatePDF(data: any[]): void {
-    const doc        = new jsPDF('p', 'mm', 'a4');
-    const pageWidth  = doc.internal.pageSize.getWidth();
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
     const marginLeft = 14;
-    let   currentY   = 20;
+    let currentY = 20;
 
     // ── HEADER ──────────────────────────────────────────────
     doc.setFontSize(20);
@@ -174,10 +176,10 @@ export class AccountDetailsComponent implements OnInit {
 
     // ── ACCOUNT DETAILS ──────────────────────────────────────
     const accountNumber = this.account.accountNumber || this.account.id || 'N/A';
-    const accountType   = this.account.accountType   || this.account.type || 'N/A';
-    const balanceValue  = this.account.balance != null
+    const accountType = this.account.accountType || this.account.type || 'N/A';
+    const balanceValue = this.account.balance != null
       ? `Rs. ${Number(this.account.balance).toFixed(2)}` : 'N/A';
-    const loggedInUser  = localStorage.getItem('loggedInUser') || 'N/A';
+    const loggedInUser = localStorage.getItem('loggedInUser') || 'N/A';
     const generatedDate = this.formatDate(new Date());
 
     const details = [
@@ -195,32 +197,32 @@ export class AccountDetailsComponent implements OnInit {
 
     // ── TRANSACTIONS TABLE ───────────────────────────────────
     const tableRows = data.map(tx => [
-      tx.date        ? this.formatDate(tx.date) : 'N/A',
+      tx.date ? this.formatDate(tx.date) : 'N/A',
       tx.description || '',
       `Rs. ${Number(tx.amount || 0).toFixed(2)}`,
-      tx.type        || 'N/A',
-      tx.status      || 'N/A'
+      tx.type || 'N/A',
+      tx.status || 'N/A'
     ]);
 
-    const totalDebits  = data.filter(tx => String(tx.type).toLowerCase() === 'debit')
-                             .reduce((s, tx) => s + Number(tx.amount || 0), 0);
+    const totalDebits = data.filter(tx => String(tx.type).toLowerCase() === 'debit')
+      .reduce((s, tx) => s + Number(tx.amount || 0), 0);
     const totalCredits = data.filter(tx => String(tx.type).toLowerCase() === 'credit')
-                             .reduce((s, tx) => s + Number(tx.amount || 0), 0);
-    const netChange    = totalCredits - totalDebits;
+      .reduce((s, tx) => s + Number(tx.amount || 0), 0);
+    const netChange = totalCredits - totalDebits;
 
     autoTable(doc, {
-      startY:             currentY,
-      head:               [['Date', 'Description', 'Amount', 'Type', 'Status']],
-      body:               tableRows,
-      styles:             { font: 'helvetica', fontSize: 10, cellPadding: 3 },
-      headStyles:         { fillColor: [33, 150, 243], textColor: 255, fontStyle: 'bold' },
+      startY: currentY,
+      head: [['Date', 'Description', 'Amount', 'Type', 'Status']],
+      body: tableRows,
+      styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [33, 150, 243], textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [245, 245, 245] },
-      theme:              'grid',
-      margin:             { left: marginLeft, right: marginLeft },
-      showHead:           'everyPage',
+      theme: 'grid',
+      margin: { left: marginLeft, right: marginLeft },
+      showHead: 'everyPage',
     });
 
-    const finalY   = (doc as any).lastAutoTable?.finalY || doc.internal.pageSize.getHeight() - 30;
+    const finalY = (doc as any).lastAutoTable?.finalY || doc.internal.pageSize.getHeight() - 30;
     const summaryY = finalY + 12;
 
     // ── SUMMARY ──────────────────────────────────────────────
@@ -230,12 +232,12 @@ export class AccountDetailsComponent implements OnInit {
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.text(`Total Debits:  Rs. ${totalDebits.toFixed(2)}`,  marginLeft, summaryY + 8);
+    doc.text(`Total Debits:  Rs. ${totalDebits.toFixed(2)}`, marginLeft, summaryY + 8);
     doc.text(`Total Credits: Rs. ${totalCredits.toFixed(2)}`, marginLeft, summaryY + 14);
-    doc.text(`Net Change:    Rs. ${netChange.toFixed(2)}`,    marginLeft, summaryY + 20);
+    doc.text(`Net Change:    Rs. ${netChange.toFixed(2)}`, marginLeft, summaryY + 20);
 
     // ── FOOTER ───────────────────────────────────────────────
-    const timestamp  = new Date().toLocaleTimeString();
+    const timestamp = new Date().toLocaleTimeString();
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
     doc.text(
@@ -248,22 +250,22 @@ export class AccountDetailsComponent implements OnInit {
     // ── SAVE ─────────────────────────────────────────────────
     const sanitized = String(accountNumber).replace(/\s+/g, '_');
     const fromLabel = this.startDate || 'All';
-    const toLabel   = this.endDate   || 'All';
+    const toLabel = this.endDate || 'All';
     doc.save(`statement_${sanitized}_${fromLabel}_to_${toLabel}.pdf`);
   }
 
   private buildFilterLabel(): string {
     const parts: string[] = [];
-    if (this.filterType)  parts.push(`Type: ${this.filterType}`);
-    if (this.minAmount)   parts.push(`Min: Rs.${this.minAmount}`);
-    if (this.maxAmount)   parts.push(`Max: Rs.${this.maxAmount}`);
-    if (this.startDate)   parts.push(`From: ${this.startDate}`);
-    if (this.endDate)     parts.push(`To: ${this.endDate}`);
+    if (this.filterType) parts.push(`Type: ${this.filterType}`);
+    if (this.minAmount) parts.push(`Min: Rs.${this.minAmount}`);
+    if (this.maxAmount) parts.push(`Max: Rs.${this.maxAmount}`);
+    if (this.startDate) parts.push(`From: ${this.startDate}`);
+    if (this.endDate) parts.push(`To: ${this.endDate}`);
     return parts.length ? `Filters Applied - ${parts.join(' | ')}` : 'All Transactions';
   }
 
   private formatDate(date: Date | string): string {
-    const d  = typeof date === 'string' ? new Date(date) : date;
+    const d = typeof date === 'string' ? new Date(date) : date;
     const dd = String(d.getDate()).padStart(2, '0');
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     return `${dd}/${mm}/${d.getFullYear()}`;
