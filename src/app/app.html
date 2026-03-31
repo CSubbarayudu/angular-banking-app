@@ -1,4 +1,4 @@
-<div class="app-layout">
+<div class="app-layout" [class.sidebar-open]="sidebarOpen">
 
   <app-navbar *ngIf="!isLoginPage"></app-navbar>
 
@@ -6,6 +6,8 @@
 
     <div class="top-bar" *ngIf="!isLoginPage">
       <div class="top-bar-left">
+        <button class="hamburger-btn"
+                (click)="toggleSidebar()">☰</button>
         <span class="top-bar-title">🏦 SecureBank</span>
       </div>
       <div class="top-bar-right">

@@ -15,6 +15,7 @@ import { NavbarComponent } from
 export class AppComponent implements OnInit {
 
   isLoginPage = true;
+  sidebarOpen = false;
 
   constructor(
     private router: Router,
@@ -32,9 +33,16 @@ export class AppComponent implements OnInit {
                  || (event as any).url
                  || '';
         this.isLoginPage = this.checkUrl(url);
+        if (window.innerWidth <= 768) {
+          this.sidebarOpen = false;
+        }
         this.cdr.detectChanges();
       }
     });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
   }
 
   private checkUrl(url: string): boolean {

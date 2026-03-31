@@ -58,7 +58,7 @@
 .profile-info {
   display: flex;
   flex-direction: column;
-  gap: 5px;        /* ← spacing between name and tag */
+  gap: 5px;
   overflow: hidden;
   min-width: 0;
 }
@@ -95,10 +95,9 @@
   padding: 12px 10px 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;        /* ← gap between nav items */
+  gap: 4px;
 }
 
-/* MAIN MENU label */
 .nav-section-label {
   display: block;
   font-size: 10px;
@@ -112,7 +111,6 @@
   line-height: 1;
 }
 
-/* Nav link */
 .nav-link {
   display: flex;
   align-items: center;
@@ -153,11 +151,11 @@
   line-height: 1;
 }
 
-/* ── Footer / Logout — PINNED TO BOTTOM ── */
+/* ── Footer / Logout ── */
 .sidebar-footer {
   flex-shrink: 0;
   padding: 0 10px 16px;
-  margin-top: auto;   /* ← pushes footer to bottom always */
+  margin-top: auto;
 }
 
 .logout-btn {
@@ -184,7 +182,6 @@
   color: #fca5a5;
 }
 
-/* ── Scrollbar ── */
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb {
@@ -192,3 +189,11 @@
   border-radius: 2px;
 }
 
+/* ── MOBILE: sidebar as overlay ── */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.25);
+  }
+}

@@ -98,6 +98,115 @@ textarea:focus {
   font-weight: 500;
 }
 
+/* ===== GLOBAL RESPONSIVE BASE ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Make all images, tables, inputs fluid */
+img, table, input, select, button {
+  max-width: 100%;
+}
+
+/* Horizontal scroll for all tables globally */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Make all page-level containers fluid */
+.accounts-page,
+.account-details-page,
+.statements-page,
+.dashboard-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Stack filter rows on mobile */
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .filter-field {
+    width: 100% !important;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .filter-actions button {
+    flex: 1;
+  }
+
+  /* Stack account meta items */
+  .account-meta {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Stack summary bar */
+  .summary-bar {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Page header stack */
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  /* Table: hide less important columns on mobile */
+  .stmt-table th:nth-child(2),
+  .stmt-table td:nth-child(2) {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Cards full width */
+  .account-card,
+  .info-card,
+  .filter-card,
+  .table-card,
+  .summary-card {
+    margin: 0 0 12px 0 !important;
+    border-radius: 8px !important;
+  }
+
+  /* Button sizing */
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline,
+  .btn-download {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .account-meta {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .summary-bar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
 .badge-active {
   background: #ecfdf5;
   color: #065f46;

@@ -73,18 +73,77 @@
   padding: 0;
 }
 
-/* Responsive */
+/* ===== RESPONSIVE LAYOUT ===== */
+
+/* Hamburger button — hidden on desktop */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #1e3a5f;
+}
+
 @media (max-width: 768px) {
+
+  /* Show hamburger */
+  .hamburger-btn {
+    display: block;
+  }
+
+  /* Hide sidebar by default on mobile */
+  app-navbar {
+    display: none;
+  }
+
+  /* When .sidebar-open class is on app-layout, show it */
+  .app-layout.sidebar-open app-navbar {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    height: 100vh;
+    width: 240px;
+    overflow-y: auto;
+  }
+
+  /* Overlay behind sidebar on mobile */
+  .app-layout.sidebar-open::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 998;
+  }
+
+  /* Remove left margin — sidebar is overlay now */
   .main-wrapper {
-    margin-left: 0;
+    margin-left: 0 !important;
   }
 
+  /* Top bar — show hamburger + title row */
   .top-bar {
-    padding: 0 16px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
   }
 
-  .top-bar-content {
-    flex-direction: column;
-    gap: 8px;
+  /* Content area padding tighter on mobile */
+  .content-area {
+    padding: 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-bar-title {
+    font-size: 14px;
+  }
+
+  .top-bar-badge {
+    display: none; /* hide "Personal Banking Portal" on very small screens */
   }
 }
