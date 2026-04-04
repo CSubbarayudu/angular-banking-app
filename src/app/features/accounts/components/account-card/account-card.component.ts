@@ -16,12 +16,25 @@ export class AccountCardComponent {
     this.cardClicked.emit(this.account.id);
   }
 
-  getStatusColor(status: string): string {
-    const colorMap: Record<string, string> = {
-      'Active': 'green',
-      'Inactive': 'orange',
-      'Blocked': 'red'
+  getAccountIcon(type: string): string {
+    const icons: Record<string, string> = {
+      'Savings': '🏦',
+      'Current': '💼',
+      'Fixed Deposit': '🔒'
     };
-    return colorMap[status] || 'black';
+    return icons[type] || '💳';
+  }
+
+  getMaskedNumber(accountNumber: string): string {
+    return '••••' + accountNumber.slice(-4);
+  }
+
+  getStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      'Active': 'badge-active',
+      'Inactive': 'badge-inactive',
+      'Blocked': 'badge-blocked'
+    };
+    return map[status] || 'badge-active';
   }
 }

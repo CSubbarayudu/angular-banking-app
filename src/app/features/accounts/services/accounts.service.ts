@@ -3,11 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Account } from '../models/account.model';
 import { Transaction } from '../models/transaction.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AccountsService {
 
-  private baseUrl = 'http://localhost:3005';
+ private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 

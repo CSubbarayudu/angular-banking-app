@@ -1,12 +1,14 @@
-<div class="card" (click)="onSelect()" style="cursor: pointer;">
-  <div class="card-content">
-    <div class="account-info">
-      <p class="account-number"><strong>Account:</strong> {{ account.accountNumber }}</p>
-      <p class="account-type"><strong>Type:</strong> {{ account.accountType }}</p>
-      <p class="account-balance"><strong>Balance:</strong> {{ account.balance }}</p>
-    </div>
-    <div class="status-badge" [style.color]="getStatusColor(account.status)">
-      <strong>Status:</strong> {{ account.status }}
-    </div>
+<div class="account-card" (click)="onSelect()">
+  <div class="card-top">
+    <span class="account-icon">{{ getAccountIcon(account.accountType) }}</span>
+    <span class="account-type">{{ account.accountType }}</span>
+  </div>
+  <div class="masked-number">{{ getMaskedNumber(account.accountNumber) }}</div>
+  <div class="account-balance">₹{{ account.balance | number }}</div>
+  <div class="card-footer">
+    <span class="status-badge" [ngClass]="getStatusClass(account.status)">
+      {{ account.status }}
+    </span>
+    <button class="btn-details">View Details →</button>
   </div>
 </div>
