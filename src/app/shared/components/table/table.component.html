@@ -1,17 +1,23 @@
 <table border="1" width="100%" style="border-collapse: collapse;">
   <thead>
     <tr>
-      <th *ngFor="let header of headers" style="padding: 8px;">
-        {{ header }}
-      </th>
+      @for (header of headers; track $index) {
+        <th style="padding: 8px;">
+          {{ header }}
+        </th>
+      }
     </tr>
   </thead>
 
   <tbody>
-    <tr *ngFor="let row of data">
-      <td *ngFor="let col of columns" style="padding: 8px;">
-        {{ row[col] }}
-      </td>
-    </tr>
+    @for (row of data; track $index) {
+      <tr>
+        @for (col of columns; track col) {
+          <td style="padding: 8px;">
+            {{ row[col] }}
+          </td>
+        }
+      </tr>
+    }
   </tbody>
 </table>

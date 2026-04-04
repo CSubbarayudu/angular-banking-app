@@ -1,7 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
+import { AccountCardComponent } from '../../components/account-card/account-card.component';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
 
@@ -9,7 +10,7 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
 @Component({
   selector: 'app-accounts-container',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, LoaderComponent, ErrorMessageComponent],
+  imports: [AccountCardComponent, LoaderComponent, ErrorMessageComponent],
   templateUrl: './accounts-container.component.html',
   styleUrls: ['./accounts-container.component.css']
 })

@@ -12,69 +12,34 @@
   </div>
 
   <!-- Loading State -->
-  <app-loader *ngIf="isLoading"></app-loader>
+  @if (isLoading) {
+    <app-loader></app-loader>
+  }
 
   <!-- Error State -->
-  <app-error-message *ngIf="errorMsg && !isLoading" [message]="errorMsg"></app-error-message>
+  @if (errorMsg && !isLoading) {
+    <app-error-message [message]="errorMsg"></app-error-message>
+  }
 
   <!-- Accounts List -->
-  <div class="accounts-list" *ngIf="!isLoading && !errorMsg">
+  @if (!isLoading && !errorMsg) {
+    <div class="accounts-list">
 
-    <!-- Empty State -->
-    <div *ngIf="accounts.length === 0" class="empty-state">
-      <p>No accounts found for your profile.</p>
-    </div>
-
-    <!-- Account Card -->
-    <div class="account-card" *ngFor="let account of accounts">
-
-      <!-- Card Header -->
-      <div class="card-header">
-        <div class="card-title">
-          <span class="acc-icon">{{ getAccountIcon(account.accountType) }}</span>
-          <span class="acc-type">{{ account.accountType }} Account</span>
+      <!-- Empty State -->
+      @if (accounts.length === 0) {
+        <div class="empty-state">
+          <p>No accounts found for your profile.</p>
         </div>
-        <span [ngClass]="getStatusClass(account.status)" class="status-badge">
-          ● {{ account.status }}
-        </span>
-      </div>
+      }
 
-      <!-- Card Divider -->
-      <hr class="card-divider" />
-
-      <!-- Card Body -->
-      <div class="card-body">
-        <div class="card-info-grid">
-          <div class="info-item">
-            <span class="info-label">Account Number</span>
-            <span class="info-value">{{ getMaskedNumber(account.accountNumber) }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Available Balance</span>
-            <span class="info-value balance-highlight">
-              {{ account.balance | currency:'INR':'symbol':'1.0-0' }}
-            </span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">IFSC Code</span>
-            <span class="info-value">{{ account.ifscCode || 'N/A' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Branch</span>
-            <span class="info-value">{{ account.branch || 'N/A' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card Footer -->
-      <div class="card-footer">
-        <button class="btn-view-details" (click)="goToDetails(account.id)">
-          View Details & Transactions →
-        </button>
-      </div>
+      <!-- Account Cards -->
+      @for (account of accounts; track account.id) {
+        <app-account-card 
+          [account]="account"
+          (cardClicked)="goToDetails($event)">
+        </app-account-card>
+      }
 
     </div>
-    <!-- End *ngFor -->
-
-  </div>
+  }
 </div>

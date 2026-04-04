@@ -1,0 +1,12 @@
+<div class="card" (click)="onSelect()" style="cursor: pointer;">
+  <div class="card-content">
+    <div class="account-info">
+      <p class="account-number"><strong>Account:</strong> {{ account.accountNumber }}</p>
+      <p class="account-type"><strong>Type:</strong> {{ account.accountType }}</p>
+      <p class="account-balance"><strong>Balance:</strong> {{ account.balance }}</p>
+    </div>
+    <div class="status-badge" [style.color]="getStatusColor(account.status)">
+      <strong>Status:</strong> {{ account.status }}
+    </div>
+  </div>
+</div>

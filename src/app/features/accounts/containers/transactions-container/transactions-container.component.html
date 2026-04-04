@@ -1,9 +1,15 @@
 <div class="transactions-page">
     <h1>Transaction History</h1>
 
-    <app-loader *ngIf="loading"></app-loader>
+    @if (loading) {
+      <app-loader></app-loader>
+    }
 
-    <app-error-message *ngIf="error" [message]="error"></app-error-message>
+    @if (error) {
+      <app-error-message [message]="error"></app-error-message>
+    }
 
-    <app-table *ngIf="!loading && !error" [headers]="headers" [data]="transactions" [columns]="columns"></app-table>
+    @if (!loading && !error) {
+      <app-table [headers]="headers" [data]="transactions" [columns]="columns"></app-table>
+    }
 </div>

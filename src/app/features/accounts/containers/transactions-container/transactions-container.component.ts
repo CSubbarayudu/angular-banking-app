@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { AccountsService } from '../../services/accounts.service';
@@ -11,7 +10,7 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
 @Component({
   selector: 'app-transactions-container',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableComponent, LoaderComponent, ErrorMessageComponent],
+  imports: [FormsModule, TableComponent, LoaderComponent, ErrorMessageComponent],
   templateUrl: './transactions-container.component.html'
 })
 export class TransactionsContainerComponent implements OnInit {

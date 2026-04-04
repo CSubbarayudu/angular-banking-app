@@ -1,12 +1,16 @@
 <div class="dashboard-container">
   <!-- Error State -->
-  <app-error-message *ngIf="errorMsg && !isLoading" [message]="errorMsg"></app-error-message>
+  @if (errorMsg && !isLoading) {
+    <app-error-message [message]="errorMsg"></app-error-message>
+  }
 
   <!-- Loading State -->
-  <app-loader *ngIf="isLoading"></app-loader>
+  @if (isLoading) {
+    <app-loader></app-loader>
+  }
 
   <!-- Content -->
-  <div *ngIf="!isLoading && !errorMsg">
+  @if (!isLoading && !errorMsg) {
     <!-- Header Section -->
     <div class="dashboard-header">
       <div class="greeting">
@@ -51,14 +55,16 @@
         <h3 class="section-title">Your Accounts</h3>
       </div>
       <div class="account-cards-grid">
-        <div class="account-card" *ngFor="let account of accounts">
-          <div class="acc-type">🏦 {{ account.accountType }}</div>
-          <div class="acc-number">••••{{ account.accountNumber.slice(-4) }}</div>
-          <div class="acc-balance">{{ account.balance | currency:'INR':'symbol':'1.0-0' }}</div>
-          <button class="view-details-btn" (click)="goToAccountDetails(account.id)">
-            View Details →
-          </button>
-        </div>
+        @for (account of accounts; track account.id) {
+          <div class="account-card">
+            <div class="acc-type">🏦 {{ account.accountType }}</div>
+            <div class="acc-number">••••{{ account.accountNumber.slice(-4) }}</div>
+            <div class="acc-balance">{{ account.balance | currency:'INR':'symbol':'1.0-0' }}</div>
+            <button class="view-details-btn" (click)="goToAccountDetails(account.id)">
+              View Details →
+            </button>
+          </div>
+        }
       </div>
     </div>
 
@@ -69,22 +75,27 @@
         <a class="view-all-link" (click)="goToAccounts()">View All →</a>
       </div>
 
-      <div class="transactions-list" *ngIf="recentTransactions.length > 0">
-        <div class="transaction-row" *ngFor="let transaction of recentTransactions; let last = last"
-          [class.last-row]="last">
-          <div class="tx-description">{{ transaction.description }}</div>
-          <div class="tx-account">••••{{ transaction.accountNumber.slice(-4) }}</div>
-          <div class="tx-amount" [class.credit]="transaction.type === 'Credit'"
-            [class.debit]="transaction.type === 'Debit'">
-            {{ transaction.type === 'Credit' ? '+' : '−' }}{{ transaction.amount | currency:'INR':'symbol':'1.0-0' }}
-          </div>
-          <div class="tx-date">{{ transaction.date }}</div>
+      @if (recentTransactions.length > 0) {
+        <div class="transactions-list">
+          @for (transaction of recentTransactions; track transaction.id) {
+            <div class="transaction-row" [class.last-row]="$last">
+              <div class="tx-description">{{ transaction.description }}</div>
+              <div class="tx-account">••••{{ transaction.accountNumber.slice(-4) }}</div>
+              <div class="tx-amount" [class.credit]="transaction.type === 'Credit'"
+                [class.debit]="transaction.type === 'Debit'">
+                {{ transaction.type === 'Credit' ? '+' : '−' }}{{ transaction.amount | currency:'INR':'symbol':'1.0-0' }}
+              </div>
+              <div class="tx-date">{{ transaction.date }}</div>
+            </div>
+          }
         </div>
-      </div>
+      }
 
-      <div class="no-transactions" *ngIf="recentTransactions.length === 0">
-        <p>No transactions found</p>
-      </div>
+      @if (recentTransactions.length === 0) {
+        <div class="no-transactions">
+          <p>No transactions found</p>
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>

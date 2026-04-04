@@ -13,36 +13,40 @@
   <div class="card account-info-card">
     <h2 class="card-title">Account Details</h2>
 
-    <app-loader *ngIf="accountLoading"></app-loader>
+    @if (accountLoading) {
+      <app-loader></app-loader>
+    }
 
-    <div *ngIf="account && !accountLoading" class="account-info">
-      <div class="info-row">
-        <div class="info-item">
-          <span class="info-label">Account Number</span>
-          <span class="info-value">{{ account.accountNumber }}</span>
+    @if (account && !accountLoading) {
+      <div class="account-info">
+        <div class="info-row">
+          <div class="info-item">
+            <span class="info-label">Account Number</span>
+            <span class="info-value">{{ account.accountNumber }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Account Type</span>
+            <span class="info-value">{{ account.accountType }}</span>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Account Type</span>
-          <span class="info-value">{{ account.accountType }}</span>
+        <div class="info-row">
+          <div class="info-item">
+            <span class="info-label">Available Balance</span>
+            <span class="info-value balance-amount">{{ account.balance | currency:'INR':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="badge" [ngClass]="{
+                    'badge-active': account.status === 'Active',
+                    'badge-inactive': account.status === 'Inactive',
+                    'badge-blocked': account.status === 'Blocked'
+                  }">
+              {{ account.status }}
+            </span>
+          </div>
         </div>
       </div>
-      <div class="info-row">
-        <div class="info-item">
-          <span class="info-label">Available Balance</span>
-          <span class="info-value balance-amount">{{ account.balance | currency:'INR':'symbol':'1.0-0' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Status</span>
-          <span class="badge" [ngClass]="{
-                  'badge-active': account.status === 'Active',
-                  'badge-inactive': account.status === 'Inactive',
-                  'badge-blocked': account.status === 'Blocked'
-                }">
-            {{ account.status }}
-          </span>
-        </div>
-      </div>
-    </div>
+    }
   </div>
 
   <!-- Filters Card -->
@@ -88,10 +92,12 @@
   </div>
 
   <!-- Transactions Loading State -->
-  <app-loader *ngIf="loading"></app-loader>
+  @if (loading) {
+    <app-loader></app-loader>
+  }
 
   <!-- Transactions Table -->
-  <ng-container *ngIf="!loading && transactions.length > 0">
+  @if (!loading && transactions.length > 0) {
     <div class="card transactions-card">
       <table class="transactions-table">
         <thead>
@@ -104,28 +110,30 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let txn of transactions">
-            <td class="tx-date">{{ txn.date }}</td>
-            <td class="tx-description">{{ txn.description || '-' }}</td>
-            <td class="tx-amount" [class.credit]="txn.type === 'Credit'" [class.debit]="txn.type === 'Debit'">
-              {{ txn.type === 'Credit' ? '+' : '−' }}{{ txn.amount | currency:'INR':'symbol':'1.0-0' }}
-            </td>
-            <td>
-              <span class="badge"
-                [ngClass]="{ 'badge-active': txn.type === 'Credit', 'badge-debit': txn.type === 'Debit' }">
-                {{ txn.type }}
-              </span>
-            </td>
-            <td>
-              <span class="badge" [ngClass]="{
-                      'badge-active': txn.status === 'Completed',
-                      'badge-pending': txn.status === 'Pending',
-                      'badge-failed': txn.status === 'Failed'
-                    }">
-                {{ txn.status }}
-              </span>
-            </td>
-          </tr>
+          @for (txn of transactions; track txn.id) {
+            <tr>
+              <td class="tx-date">{{ txn.date }}</td>
+              <td class="tx-description">{{ txn.description || '-' }}</td>
+              <td class="tx-amount" [class.credit]="txn.type === 'Credit'" [class.debit]="txn.type === 'Debit'">
+                {{ txn.type === 'Credit' ? '+' : '−' }}{{ txn.amount | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+              <td>
+                <span class="badge"
+                  [ngClass]="{ 'badge-active': txn.type === 'Credit', 'badge-debit': txn.type === 'Debit' }">
+                  {{ txn.type }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{
+                        'badge-active': txn.status === 'Completed',
+                        'badge-pending': txn.status === 'Pending',
+                        'badge-failed': txn.status === 'Failed'
+                      }">
+                  {{ txn.status }}
+                </span>
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
 
@@ -136,11 +144,13 @@
         <button class="btn-outline" (click)="nextPage()" [disabled]="transactions.length < limit">Next →</button>
       </div>
     </div>
-  </ng-container>
+  }
 
   <!-- Empty State -->
-  <p *ngIf="!loading && transactions.length === 0" class="text-muted empty-message">
-    No transactions found for selected filters.
-  </p>
+  @if (!loading && transactions.length === 0) {
+    <p class="text-muted empty-message">
+      No transactions found for selected filters.
+    </p>
+  }
 
 </div>
