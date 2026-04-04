@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { canDeactivateGuard } from '../../core/guards/can-deactivate-guard';
 
 const routes: Routes = [
   {
@@ -22,8 +21,7 @@ const routes: Routes = [
         .then(m => m.TransactionsContainerComponent)
   },
   {
-    path: ':id',
-    canDeactivate: [canDeactivateGuard],   // ← WIRED HERE
+    path: ':id',   
     loadComponent: () =>
       import('./containers/account-details.component/account-details.component')
         .then(m => m.AccountDetailsComponent)

@@ -9,7 +9,7 @@ export class AccountsService {
 
   private baseUrl = 'http://localhost:3005';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAccounts(): Observable<Account[]> {
     return this.http.get<Account[]>(`${this.baseUrl}/accounts`);
