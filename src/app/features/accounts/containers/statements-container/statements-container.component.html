@@ -25,30 +25,13 @@
   <div *ngIf="!accountLoading && !transactionsLoading && !accountError && !transactionsError">
 
     <!-- Account Info Card -->
-    <div class="info-card" *ngIf="account">
-      <div class="account-meta">
-        <div class="meta-item">
-          <span class="meta-label">Account Number</span>
-          <span class="meta-value">
-            •••• {{ account?.accountNumber?.slice(-4) }}
-          </span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Account Type</span>
-          <span class="meta-value">{{ account?.accountType }}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Status</span>
-          <span class="badge-active">● {{ account?.status }}</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-label">Current Balance</span>
-          <span class="meta-value balance-text">
-            {{ account?.balance | currency:'INR':'symbol':'1.0-0' }}
-          </span>
-        </div>
-      </div>
-    </div>
+<div *ngIf="account">
+  <!-- 👇 Reusing the same card component, read-only -->
+  <app-account-card 
+    [account]="account" 
+    [interactive]="false">
+  </app-account-card>
+</div>
 
     <!-- Date Filter Card -->
     <div class="filter-card">

@@ -5,11 +5,11 @@ import { FormsModule } from '@angular/forms';
 import { AccountsService } from '../../services/accounts.service';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
+import { AccountCardComponent } from '../../components/account-card/account-card.component';
 @Component({
   selector: 'app-statements-container',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AccountCardComponent],
   templateUrl: './statements-container.component.html',
   styleUrls: ['./statements-container.component.css']
 })

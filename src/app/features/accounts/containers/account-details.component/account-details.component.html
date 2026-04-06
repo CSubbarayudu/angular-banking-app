@@ -9,45 +9,22 @@
     </div>
   </div>
 
-  <!-- Account Info Card -->
-  <div class="card account-info-card">
-    <h2 class="card-title">Account Details</h2>
+<!-- Account Info Card -->
+<div class="card account-info-card">
+  <h2 class="card-title">Account Details</h2>
 
-    @if (accountLoading) {
-      <app-loader></app-loader>
-    }
+  @if (accountLoading) {
+    <app-loader></app-loader>
+  }
 
-    @if (account && !accountLoading) {
-      <div class="account-info">
-        <div class="info-row">
-          <div class="info-item">
-            <span class="info-label">Account Number</span>
-            <span class="info-value">{{ account.accountNumber }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Account Type</span>
-            <span class="info-value">{{ account.accountType }}</span>
-          </div>
-        </div>
-        <div class="info-row">
-          <div class="info-item">
-            <span class="info-label">Available Balance</span>
-            <span class="info-value balance-amount">{{ account.balance | currency:'INR':'symbol':'1.0-0' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Status</span>
-            <span class="badge" [ngClass]="{
-                    'badge-active': account.status === 'Active',
-                    'badge-inactive': account.status === 'Inactive',
-                    'badge-blocked': account.status === 'Blocked'
-                  }">
-              {{ account.status }}
-            </span>
-          </div>
-        </div>
-      </div>
-    }
-  </div>
+  @if (account && !accountLoading) {
+    <!-- 👇 Use reusable card, interactive=false (no click needed here) -->
+    <app-account-card 
+      [account]="account" 
+      [interactive]="false">
+    </app-account-card>
+  }
+</div>
 
   <!-- Filters Card -->
   <div class="card filter-card">

@@ -1,14 +1,37 @@
 <div class="account-card" (click)="onSelect()">
-  <div class="card-top">
-    <span class="account-icon">{{ getAccountIcon(account.accountType) }}</span>
-    <span class="account-type">{{ account.accountType }}</span>
+
+  <!-- Account Type Icon + Label -->
+  <div class="card-header">
+    <span class="account-icon">{{ getAccountIcon(account?.accountType) }}</span>
+    <span class="account-type">{{ account?.accountType | uppercase }}</span>
   </div>
-  <div class="masked-number">{{ getMaskedNumber(account.accountNumber) }}</div>
-  <div class="account-balance">₹{{ account.balance | number }}</div>
+
+  <!-- Account Number — masked in list, full in details -->
+  <div class="account-number">
+    @if (interactive) {
+      {{ getMaskedNumber(account?.accountNumber) }}
+    } @else {
+      {{ account?.accountNumber }}
+    }
+  </div>
+
+  <!-- Balance -->
+  <div class="account-balance">
+    {{ account?.balance | currency:'INR':'symbol':'1.0-0' }}
+  </div>
+
+  <!-- Footer -->
   <div class="card-footer">
-    <span class="status-badge" [ngClass]="getStatusClass(account.status)">
-      {{ account.status }}
+    <span [ngClass]="getStatusClass(account?.status)">
+      {{ account?.status }}
     </span>
-    <button class="btn-details">View Details →</button>
+
+    <!-- ✅ Only show View Details button on accounts LIST, not on details page -->
+    @if (interactive) {
+      <button class="btn-outline" (click)="onSelect(); $event.stopPropagation()">
+        View Details →
+      </button>
+    }
   </div>
+
 </div>

@@ -7,11 +7,11 @@ import { LoaderComponent } from '../../../../shared/components/loader/loader.com
 import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
+import { AccountCardComponent } from '../../components/account-card/account-card.component';
 @Component({
   selector: 'app-account-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoaderComponent],
+  imports: [CommonModule, FormsModule, LoaderComponent, AccountCardComponent],
   templateUrl: './account-details.component.html',
   styleUrls: ['./account-details.component.css']
 })

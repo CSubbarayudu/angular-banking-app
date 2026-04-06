@@ -10,10 +10,13 @@ import { CommonModule } from '@angular/common';
 })
 export class AccountCardComponent {
   @Input() account: any;
+  @Input() interactive: boolean = true;  // 👈 ADD THIS LINE
   @Output() cardClicked = new EventEmitter<string>();
 
   onSelect(): void {
-    this.cardClicked.emit(this.account.id);
+    if (this.interactive) {             // 👈 ADD THIS CHECK
+      this.cardClicked.emit(this.account.id);
+    }
   }
 
   getAccountIcon(type: string): string {
