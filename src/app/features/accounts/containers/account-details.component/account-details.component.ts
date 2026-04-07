@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AccountsService } from '../../services/accounts.service';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
-import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AccountCardComponent } from '../../components/account-card/account-card.component';

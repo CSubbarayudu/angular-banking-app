@@ -1,9 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router, NavigationStart,
-         NavigationEnd } from '@angular/router';
-import { NavbarComponent } from
-  './shared/components/navbar/navbar.component';
+import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterOutlet, Router, NavigationStart, NavigationEnd } from '@angular/router';
+import { NavbarComponent } from './shared/components/navbar/navbar.component';
 
 @Component({
   selector: 'app-root',
@@ -19,23 +17,25 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object  // ✅ ADDED
   ) {
-    // Run check in constructor — before ANY template renders
     this.isLoginPage = this.checkUrl(this.router.url);
   }
 
   ngOnInit(): void {
     this.router.events.subscribe(event => {
-      if (event instanceof NavigationStart
-       || event instanceof NavigationEnd) {
+      if (event instanceof NavigationStart || event instanceof NavigationEnd) {
         const url = (event as any).urlAfterRedirects
                  || (event as any).url
                  || '';
         this.isLoginPage = this.checkUrl(url);
-        if (window.innerWidth <= 768) {
+
+        // ✅ FIXED: was window.innerWidth directly — crashes during SSR build
+        if (isPlatformBrowser(this.platformId) && window.innerWidth <= 768) {
           this.sidebarOpen = false;
         }
+
         this.cdr.detectChanges();
       }
     });
