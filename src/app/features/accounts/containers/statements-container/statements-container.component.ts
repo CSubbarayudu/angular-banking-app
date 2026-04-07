@@ -1,11 +1,12 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core'; // ✅ added Inject, PLATFORM_ID
+import { CommonModule, isPlatformBrowser } from '@angular/common'; // ✅ added isPlatformBrowser
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AccountsService } from '../../services/accounts.service';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AccountCardComponent } from '../../components/account-card/account-card.component';
+
 @Component({
   selector: 'app-statements-container',
   standalone: true,
@@ -30,7 +31,8 @@ export class StatementsContainerComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private accountsService: AccountsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object  // ✅ added
   ) {}
 
   ngOnInit(): void {
@@ -40,6 +42,8 @@ export class StatementsContainerComponent implements OnInit {
   }
 
   get loggedInUser(): string {
+    // ✅ SSR safe — only read localStorage in browser
+    if (!isPlatformBrowser(this.platformId)) return 'N/A';
     return localStorage.getItem('loggedInUser') || 'N/A';
   }
 

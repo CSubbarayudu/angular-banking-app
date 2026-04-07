@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment'; // ✅ ADDED
 
 @Component({
   selector: 'app-login',
@@ -25,7 +26,6 @@ export class LoginComponent {
   ) {}
 
   onLogin(): void {
-    // Instant client-side validation
     if (!this.username || !this.username.trim()) {
       this.errorMessage = 'Please enter your username.';
       return;
@@ -36,13 +36,12 @@ export class LoginComponent {
     }
     this.errorMessage = '';
 
-    // Show loading
     this.isLoading = true;
     this.cdr.detectChanges();
 
-    // Query db.json users array
+    // ✅ FIXED: was http://localhost:3005 hardcoded
     this.http.get<any[]>(
-      `http://localhost:3005/users?username=${this.username.trim()}`
+      `${environment.apiUrl}/users?username=${this.username.trim()}`
     ).subscribe({
       next: (users) => {
         this.isLoading = false;

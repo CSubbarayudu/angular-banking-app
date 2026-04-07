@@ -30,9 +30,9 @@
           name="password"
           placeholder="Enter your password"
           class="form-control"
-          (keyup.enter)="onLogin()"
           autocomplete="current-password"
         />
+        <!-- ✅ REMOVED: (keyup.enter)="onLogin()" — was causing double submit -->
       </div>
 
       <!-- Error Message -->
@@ -44,8 +44,8 @@
       <button
         type="submit"
         class="login-btn"
-        [disabled]="isLoading"
-        (click)="onLogin()">
+        [disabled]="isLoading">
+        <!-- ✅ REMOVED: (click)="onLogin()" — was causing double submit -->
         <span *ngIf="!isLoading">Login →</span>
         <span *ngIf="isLoading">⏳ Verifying...</span>
       </button>

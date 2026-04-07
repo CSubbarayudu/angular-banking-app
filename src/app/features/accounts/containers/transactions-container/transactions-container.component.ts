@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router'; // ✅ ADDED
 
 import { AccountsService } from '../../services/accounts.service';
 import { Transaction } from '../../models/transaction.model';
@@ -34,17 +35,21 @@ export class TransactionsContainerComponent implements OnInit {
   endDate = '';
   minAmount: number | null = null;
   maxAmount: number | null = null;
+  accountId = ''; // ✅ ADDED — no longer hardcoded
 
-  constructor(private service: AccountsService) { }
+  constructor(
+    private service: AccountsService,
+    private route: ActivatedRoute  // ✅ ADDED
+  ) { }
 
   ngOnInit(): void {
+    this.accountId = this.route.snapshot.paramMap.get('id') || '1'; // ✅ reads from URL
     this.loadTransactions();
   }
 
   loadTransactions(): void {
     this.loading = true;
 
-    // Bundle all filters into one object to pass to the service
     const currentFilters = {
       type: this.filterType,
       startDate: this.startDate,
@@ -54,7 +59,7 @@ export class TransactionsContainerComponent implements OnInit {
     };
 
     this.service.getTransactions(
-      '1', // We are hardcoding Account ID 1 for this specific screen
+      this.accountId,  // ✅ dynamic — not hardcoded '1' anymore
       this.page,
       this.limit,
       currentFilters,
@@ -73,7 +78,7 @@ export class TransactionsContainerComponent implements OnInit {
   }
 
   applyFilters() {
-    this.page = 1; // Always reset to page 1 when applying new filters
+    this.page = 1;
     this.loadTransactions();
   }
 

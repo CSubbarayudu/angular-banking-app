@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AccountsService } from '../../services/accounts.service';
@@ -8,6 +8,7 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { AccountCardComponent } from '../../components/account-card/account-card.component';
+
 @Component({
   selector: 'app-account-details',
   standalone: true,
@@ -38,7 +39,8 @@ export class AccountDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private service: AccountsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object  // ✅ ADDED
   ) { }
 
   ngOnInit(): void {
@@ -122,7 +124,6 @@ export class AccountDetailsComponent implements OnInit {
     this.router.navigate(['/accounts', this.accountId, 'statements']);
   }
 
-  // Downloads ALL filtered transactions as PDF (fetches all pages with limit=100)
   downloadFilteredPDF(): void {
     if (!this.account) return;
 
@@ -134,7 +135,6 @@ export class AccountDetailsComponent implements OnInit {
       endDate: this.endDate
     };
 
-    // Fetch all filtered results (not just current page) with limit=100
     this.service.getTransactions(
       this.accountId, 1, 100,
       filters, this.sortField, this.sortOrder
@@ -163,12 +163,11 @@ export class AccountDetailsComponent implements OnInit {
     doc.setFont('helvetica', 'bold');
     doc.text('BANK STATEMENT', pageWidth / 2, currentY, { align: 'center' });
 
-    // ── SUBTITLE — shows active filters ─────────────────────
+    // ── SUBTITLE ─────────────────────────────────────────────
     currentY += 8;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
-    const filterLabel = this.buildFilterLabel();
-    doc.text(filterLabel, pageWidth / 2, currentY, { align: 'center' });
+    doc.text(this.buildFilterLabel(), pageWidth / 2, currentY, { align: 'center' });
 
     currentY += 10;
     doc.setFontSize(11);
@@ -179,7 +178,12 @@ export class AccountDetailsComponent implements OnInit {
     const accountType = this.account.accountType || this.account.type || 'N/A';
     const balanceValue = this.account.balance != null
       ? `Rs. ${Number(this.account.balance).toFixed(2)}` : 'N/A';
-    const loggedInUser = localStorage.getItem('loggedInUser') || 'N/A';
+
+    // ✅ SSR SAFE — only read localStorage in browser
+    const loggedInUser = isPlatformBrowser(this.platformId)
+      ? localStorage.getItem('loggedInUser') || 'N/A'
+      : 'N/A';
+
     const generatedDate = this.formatDate(new Date());
 
     const details = [
