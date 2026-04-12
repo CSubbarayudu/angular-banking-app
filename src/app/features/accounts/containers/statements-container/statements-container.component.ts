@@ -1,23 +1,27 @@
-import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core'; // ✅ added Inject, PLATFORM_ID
-import { CommonModule, isPlatformBrowser } from '@angular/common'; // ✅ added isPlatformBrowser
+import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AccountsService } from '../../services/accounts.service';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { AccountsService } from '../../services/accounts.service';
 import { AccountCardComponent } from '../../components/account-card/account-card.component';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
+import { Account } from '../../models/account.model';
+import { Transaction } from '../../models/transaction.model';
 
 @Component({
   selector: 'app-statements-container',
   standalone: true,
-  imports: [CommonModule, FormsModule, AccountCardComponent],
+  imports: [CommonModule, FormsModule, AccountCardComponent, LoaderComponent, ErrorMessageComponent],
   templateUrl: './statements-container.component.html',
   styleUrls: ['./statements-container.component.css']
 })
 export class StatementsContainerComponent implements OnInit {
   accountId = '';
-  account: any = null;
-  transactions: any[] = [];
+  account: Account | null = null;
+  transactions: Transaction[] = [];
 
   accountLoading = false;
   transactionsLoading = false;
@@ -28,11 +32,11 @@ export class StatementsContainerComponent implements OnInit {
   selectedToDate = '';
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private accountsService: AccountsService,
-    private cdr: ChangeDetectorRef,
-    @Inject(PLATFORM_ID) private platformId: Object  // ✅ added
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly accountsService: AccountsService,
+    private readonly cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private readonly platformId: object,
   ) {}
 
   ngOnInit(): void {
@@ -42,17 +46,16 @@ export class StatementsContainerComponent implements OnInit {
   }
 
   get loggedInUser(): string {
-    // ✅ SSR safe — only read localStorage in browser
     if (!isPlatformBrowser(this.platformId)) return 'N/A';
     return localStorage.getItem('loggedInUser') || 'N/A';
   }
 
-  get filteredTransactions(): any[] {
+  get filteredTransactions(): Transaction[] {
     if (!this.selectedFromDate && !this.selectedToDate) {
       return this.transactions;
     }
 
-    return this.transactions.filter(tx => {
+    return this.transactions.filter((tx) => {
       if (!tx.date) return true;
       const txDate = new Date(tx.date);
       const from = this.selectedFromDate ? new Date(this.selectedFromDate) : null;
@@ -69,17 +72,16 @@ export class StatementsContainerComponent implements OnInit {
     this.accountError = '';
 
     this.accountsService.getAccounts().subscribe({
-      next: (accounts: any[]) => {
-        this.account = accounts.find(a => String(a.id) === String(this.accountId)) || accounts[0] || null;
+      next: (accounts) => {
+        this.account = accounts.find((a) => a.id === this.accountId) || null;
         if (!this.account) {
           this.accountError = 'Account not found';
         }
         this.accountLoading = false;
         this.cdr.detectChanges();
       },
-      error: err => {
-        console.error('Failed to load account', err);
-        this.accountError = 'Unable to load account details';
+      error: (err: Error) => {
+        this.accountError = err.message;
         this.accountLoading = false;
         this.cdr.detectChanges();
       }
@@ -90,15 +92,20 @@ export class StatementsContainerComponent implements OnInit {
     this.transactionsLoading = true;
     this.transactionsError = '';
 
-    this.accountsService.getTransactions(this.accountId, 1, 100, {}, 'date', 'desc').subscribe({
-      next: (transactions: any[]) => {
+    this.accountsService.getTransactions({
+      accountId: this.accountId,
+      page: 1,
+      limit: 100,
+      sortField: 'date',
+      sortOrder: 'desc'
+    }).subscribe({
+      next: (transactions) => {
         this.transactions = transactions || [];
         this.transactionsLoading = false;
         this.cdr.detectChanges();
       },
-      error: err => {
-        console.error('Failed to load transactions', err);
-        this.transactionsError = 'Unable to load transactions';
+      error: (err: Error) => {
+        this.transactionsError = err.message;
         this.transactions = [];
         this.transactionsLoading = false;
         this.cdr.detectChanges();
@@ -106,11 +113,11 @@ export class StatementsContainerComponent implements OnInit {
     });
   }
 
-  isCredit(transaction: any): boolean {
+  isCredit(transaction: Transaction): boolean {
     return String(transaction.type).toLowerCase() === 'credit';
   }
 
-  isDebit(transaction: any): boolean {
+  isDebit(transaction: Transaction): boolean {
     return String(transaction.type).toLowerCase() === 'debit';
   }
 
@@ -151,7 +158,7 @@ export class StatementsContainerComponent implements OnInit {
     doc.setFont('helvetica', 'normal');
 
     const accountNumber = this.account.accountNumber || this.account.id || 'N/A';
-    const accountType = this.account.accountType || this.account.type || 'N/A';
+    const accountType = this.account.accountType || 'N/A';
     const balanceValue = this.account.balance != null
       ? `Rs. ${Number(this.account.balance).toFixed(2)}`
       : 'N/A';
@@ -170,14 +177,14 @@ export class StatementsContainerComponent implements OnInit {
       `Generated Date:    ${generatedDate}`
     ];
 
-    details.forEach(line => {
+    details.forEach((line) => {
       currentY += 6;
       doc.text(line, marginLeft, currentY);
     });
 
     currentY += 10;
 
-    const data = this.filteredTransactions.map(tx => [
+    const data = this.filteredTransactions.map((tx) => [
       tx.date ? this.formatDate(tx.date) : 'N/A',
       tx.description || '',
       `Rs. ${Number(tx.amount || 0).toFixed(2)}`,
@@ -186,11 +193,11 @@ export class StatementsContainerComponent implements OnInit {
     ]);
 
     const totalDebits = this.filteredTransactions
-      .filter(tx => this.isDebit(tx))
+      .filter((tx) => this.isDebit(tx))
       .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
     const totalCredits = this.filteredTransactions
-      .filter(tx => this.isCredit(tx))
+      .filter((tx) => this.isCredit(tx))
       .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
     const netChange = totalCredits - totalDebits;
@@ -207,7 +214,7 @@ export class StatementsContainerComponent implements OnInit {
       showHead: 'everyPage'
     });
 
-    const finalY = (doc as any).lastAutoTable?.finalY || doc.internal.pageSize.getHeight() - 30;
+    const finalY = (doc as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || doc.internal.pageSize.getHeight() - 30;
     const summaryY = finalY + 12;
 
     doc.setFontSize(11);
@@ -237,14 +244,14 @@ export class StatementsContainerComponent implements OnInit {
   }
 
   getTotalCredits(): number {
-    return (this.filteredTransactions || this.transactions || [])
-      .filter((t: any) => t.type === 'Credit')
-      .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+    return this.filteredTransactions
+      .filter((t) => t.type === 'Credit')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
   }
 
   getTotalDebits(): number {
-    return (this.filteredTransactions || this.transactions || [])
-      .filter((t: any) => t.type === 'Debit')
-      .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+    return this.filteredTransactions
+      .filter((t) => t.type === 'Debit')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
   }
 }

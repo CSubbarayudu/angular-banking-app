@@ -1,58 +1,86 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map, timeout } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 import { Account } from '../models/account.model';
 import { Transaction } from '../models/transaction.model';
-import { environment } from '../../../../environments/environment';
+import { TransactionQuery } from '../models/transaction-query.model';
+import { User, AuthSession } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AccountsService {
+  private readonly baseUrl = environment.apiUrl;
+  private readonly requestTimeoutMs = 8000;
 
- private baseUrl = environment.apiUrl;
+  constructor(private readonly http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
+  authenticate(username: string, password: string): Observable<AuthSession | null> {
+    const params = new HttpParams().set('username', username.trim());
 
-  getAccounts(): Observable<Account[]> {
-    return this.http.get<Account[]>(`${this.baseUrl}/accounts`);
+    return this.http
+      .get<User[]>(`${this.baseUrl}/users`, { params })
+      .pipe(
+        timeout(this.requestTimeoutMs),
+        map((users) => {
+          const user = users.find(
+            (u) => u.username === username.trim() && u.password === password,
+          );
+
+          if (!user) {
+            return null;
+          }
+
+          return {
+            token: `Bearer ${user.id}`,
+            username: user.username,
+            fullName: user.fullName,
+          } satisfies AuthSession;
+        }),
+      );
   }
 
-  getTransactions(
-    accountId: string,
-    page: number,
-    limit: number,
-    filters: any,
-    sortField: string,
-    sortOrder: string
-  ): Observable<Transaction[]> {
+  getAccounts(): Observable<Account[]> {
+    return this.http
+      .get<Account[]>(`${this.baseUrl}/accounts`)
+      .pipe(timeout(this.requestTimeoutMs));
+  }
 
+  getTransactions(query: TransactionQuery): Observable<Transaction[]> {
+    const params = this.buildTransactionParams(query);
+
+    return this.http
+      .get<Transaction[]>(`${this.baseUrl}/transactions`, { params })
+      .pipe(timeout(this.requestTimeoutMs));
+  }
+
+  private buildTransactionParams(query: TransactionQuery): HttpParams {
     let params = new HttpParams()
-      .set('accountId', accountId)
-      .set('_page', page.toString())
-      .set('_limit', limit.toString())
-      .set('_sort', sortField)
-      .set('_order', sortOrder);
+      .set('accountId', query.accountId)
+      .set('_page', String(query.page))
+      .set('_limit', String(query.limit))
+      .set('_sort', query.sortField)
+      .set('_order', query.sortOrder);
 
-    // Type filter
-    if (filters?.type) {
-      params = params.set('type', filters.type);
-    }
-
-    // Amount range filters
-    if (filters?.minAmount !== null && filters?.minAmount !== undefined) {
-      params = params.set('amount_gte', filters.minAmount.toString());
-    }
-    if (filters?.maxAmount !== null && filters?.maxAmount !== undefined) {
-      params = params.set('amount_lte', filters.maxAmount.toString());
+    if (query.type) {
+      params = params.set('type', query.type);
     }
 
-    // Date range filters (Task 2)
-    if (filters?.startDate) {
-      params = params.set('date_gte', filters.startDate);
-    }
-    if (filters?.endDate) {
-      params = params.set('date_lte', filters.endDate);
+    if (query.minAmount != null) {
+      params = params.set('amount_gte', String(query.minAmount));
     }
 
-    return this.http.get<Transaction[]>(`${this.baseUrl}/transactions`, { params });
+    if (query.maxAmount != null) {
+      params = params.set('amount_lte', String(query.maxAmount));
+    }
+
+    if (query.startDate) {
+      params = params.set('date_gte', query.startDate);
+    }
+
+    if (query.endDate) {
+      params = params.set('date_lte', query.endDate);
+    }
+
+    return params;
   }
 }

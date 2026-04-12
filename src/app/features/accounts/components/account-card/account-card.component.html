@@ -2,28 +2,28 @@
 
   <!-- Account Type Icon + Label -->
   <div class="card-header">
-    <span class="account-icon">{{ getAccountIcon(account?.accountType) }}</span>
-    <span class="account-type">{{ account?.accountType | uppercase }}</span>
+    <span class="account-icon">{{ getAccountIcon(account.accountType) }}</span>
+    <span class="account-type">{{ account.accountType | uppercase }}</span>
   </div>
 
   <!-- Account Number — masked in list, full in details -->
   <div class="account-number">
     @if (interactive) {
-      {{ getMaskedNumber(account?.accountNumber) }}
+      {{ getMaskedNumber(account.accountNumber) }}
     } @else {
-      {{ account?.accountNumber }}
+      {{ account.accountNumber }}
     }
   </div>
 
   <!-- Balance -->
   <div class="account-balance">
-    {{ account?.balance | currency:'INR':'symbol':'1.0-0' }}
+    {{ account.balance | currency:'INR':'symbol':'1.0-0' }}
   </div>
 
   <!-- Footer -->
   <div class="card-footer">
-    <span [ngClass]="getStatusClass(account?.status)">
-      {{ account?.status }}
+    <span [ngClass]="getStatusClass(account.status)">
+      {{ account.status }}
     </span>
 
     <!-- ✅ Only show View Details button on accounts LIST, not on details page -->
