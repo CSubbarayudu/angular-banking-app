@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router'; // ✅ ADDED
+import { ActivatedRoute } from '@angular/router';
 
 import { AccountsService } from '../../services/accounts.service';
 import { Transaction } from '../../models/transaction.model';
+import { TransactionQuery } from '../../models/transaction-query.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
@@ -15,62 +16,57 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
   templateUrl: './transactions-container.component.html'
 })
 export class TransactionsContainerComponent implements OnInit {
-
   transactions: Transaction[] = [];
   loading = false;
   error = '';
 
   headers = ['Date', 'Amount', 'Type', 'Status'];
-  columns = ['date', 'amount', 'type', 'status'];
+  columns: Array<keyof Transaction> = ['date', 'amount', 'type', 'status'];
 
-  // Pagination & Sorting State
   page = 1;
   limit = 5;
-  sortField = 'date';
-  sortOrder = 'desc';
+  sortField: TransactionQuery['sortField'] = 'date';
+  sortOrder: TransactionQuery['sortOrder'] = 'desc';
 
-  // Advanced Filter State
-  filterType = '';
+  filterType: 'Credit' | 'Debit' | '' = '';
   startDate = '';
   endDate = '';
   minAmount: number | null = null;
   maxAmount: number | null = null;
-  accountId = ''; // ✅ ADDED — no longer hardcoded
+  accountId = '';
 
   constructor(
-    private service: AccountsService,
-    private route: ActivatedRoute  // ✅ ADDED
-  ) { }
+    private readonly service: AccountsService,
+    private readonly route: ActivatedRoute,
+  ) {}
 
   ngOnInit(): void {
-    this.accountId = this.route.snapshot.paramMap.get('id') || '1'; // ✅ reads from URL
+    this.accountId = this.route.snapshot.paramMap.get('id') || '1';
     this.loadTransactions();
   }
 
   loadTransactions(): void {
     this.loading = true;
 
-    const currentFilters = {
+    const query: TransactionQuery = {
+      accountId: this.accountId,
+      page: this.page,
+      limit: this.limit,
+      sortField: this.sortField,
+      sortOrder: this.sortOrder,
       type: this.filterType,
       startDate: this.startDate,
       endDate: this.endDate,
       minAmount: this.minAmount,
-      maxAmount: this.maxAmount
+      maxAmount: this.maxAmount,
     };
 
-    this.service.getTransactions(
-      this.accountId,  // ✅ dynamic — not hardcoded '1' anymore
-      this.page,
-      this.limit,
-      currentFilters,
-      this.sortField,
-      this.sortOrder
-    ).subscribe({
+    this.service.getTransactions(query).subscribe({
       next: (res) => {
         this.transactions = res;
         this.loading = false;
       },
-      error: (err: any) => {
+      error: (err: Error) => {
         this.error = err.message;
         this.loading = false;
       }
@@ -92,7 +88,7 @@ export class TransactionsContainerComponent implements OnInit {
     this.loadTransactions();
   }
 
-  sort(field: string) {
+  sort(field: TransactionQuery['sortField']) {
     this.sortField = field;
     this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
     this.loadTransactions();

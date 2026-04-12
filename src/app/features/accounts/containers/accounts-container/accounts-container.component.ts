@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angu
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
+import { Account } from '../../models/account.model';
 import { AccountCardComponent } from '../../components/account-card/account-card.component';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
@@ -16,7 +17,7 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
 })
 export class AccountsContainerComponent implements OnInit {
 
-  accounts: any[] = [];
+  accounts: Account[] = [];
   isLoading = true;
   errorMsg = '';
   loggedInUser = '';
@@ -43,9 +44,9 @@ export class AccountsContainerComponent implements OnInit {
     this.errorMsg = '';
 
     this.accountsService.getAccounts().subscribe({
-      next: (res: any[]) => {
+      next: (res: Account[]) => {
         this.accounts = (Array.isArray(res) ? res : []).filter(
-          (a: any) => a.username === this.loggedInUser
+          (a) => a.username === this.loggedInUser
         );
         this.isLoading = false;
         this.cdr.detectChanges();

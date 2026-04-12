@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../accounts/services/accounts.service';
+import { Account } from '../accounts/models/account.model';
+import { Transaction } from '../accounts/models/transaction.model';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { ErrorMessageComponent } from '../../shared/components/error-message/error-message.component';
 
@@ -18,9 +20,9 @@ export class DashboardComponent implements OnInit {
 
   fullName = '';
   loggedInUser = '';
-  accounts: any[] = [];
-  allTransactions: any[] = [];
-  recentTransactions: any[] = [];
+  accounts: Account[] = [];
+  allTransactions: (Transaction & { accountNumber: string; accountType: string })[] = [];
+  recentTransactions: (Transaction & { accountNumber: string; accountType: string })[] = [];
 
   totalBalance = 0;
   totalCredit = 0;
@@ -47,15 +49,15 @@ export class DashboardComponent implements OnInit {
   loadDashboardData(): void {
     this.isLoading = true;
     this.accountsService.getAccounts().subscribe({
-      next: (res: any[]) => {
+      next: (res: Account[]) => {
         // Filter only this user's accounts
         this.accounts = res.filter(
-          (a: any) => a.username === this.loggedInUser
+          (a) => a.username === this.loggedInUser
         );
 
         // Calculate total balance
         this.totalBalance = this.accounts.reduce(
-          (sum: number, a: any) => sum + (a.balance || 0), 0
+          (sum: number, a) => sum + (a.balance || 0), 0
         );
 
         // Fetch transactions for all accounts
@@ -79,13 +81,13 @@ export class DashboardComponent implements OnInit {
     let loaded = 0;
     this.allTransactions = [];
 
-    this.accounts.forEach((account: any) => {
+    this.accounts.forEach((account) => {
       this.accountsService
-        .getTransactions(account.id, 1, 100, {}, 'date', 'desc')
+        .getTransactions({ accountId: account.id, page: 1, limit: 100, sortField: 'date', sortOrder: 'desc' })
         .subscribe({
-          next: (txns: any[]) => {
+          next: (txns: Transaction[]) => {
             const txnsWithAccount = (Array.isArray(txns) ? txns : [])
-              .map((t: any) => ({
+              .map((t) => ({
                 ...t,
                 accountNumber: account.accountNumber,
                 accountType: account.accountType
@@ -110,16 +112,16 @@ export class DashboardComponent implements OnInit {
   computeSummary(): void {
     // Total Credit and Debit from transactions
     this.totalCredit = this.allTransactions
-      .filter((t: any) => t.type === 'Credit')
-      .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+      .filter((t) => t.type === 'Credit')
+      .reduce((sum: number, t) => sum + (t.amount || 0), 0);
 
     this.totalDebit = this.allTransactions
-      .filter((t: any) => t.type === 'Debit')
-      .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+      .filter((t) => t.type === 'Debit')
+      .reduce((sum: number, t) => sum + (t.amount || 0), 0);
 
     // Recent 5 transactions sorted by date desc
     this.recentTransactions = [...this.allTransactions]
-      .sort((a: any, b: any) =>
+      .sort((a, b) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
       )
       .slice(0, 5);
