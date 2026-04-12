@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
@@ -36,7 +36,6 @@ export class DashboardComponent implements OnInit {
   constructor(
     private readonly accountsService: AccountsService,
     private readonly router: Router,
-    private readonly cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private readonly platformId: object
   ) {}
 
@@ -61,7 +60,6 @@ export class DashboardComponent implements OnInit {
       error: (err: Error) => {
         this.isLoading = false;
         this.errorMsg = err.message;
-        this.cdr.detectChanges();
       }
     });
   }
@@ -114,7 +112,6 @@ export class DashboardComponent implements OnInit {
       .slice(0, 5);
 
     this.isLoading = false;
-    this.cdr.detectChanges();
   }
 
   goToAccounts(): void {

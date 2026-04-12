@@ -1,26 +1,31 @@
-.accounts-page { padding: 32px; background: #f8fafc; min-height: 100vh; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-.page-title { font-size: 24px; font-weight: 700; color: #1e293b; margin: 0 0 4px; }
-.page-subtitle { font-size: 14px; color: #64748b; margin: 0; }
-.summary-bar { margin-bottom: 16px; color: #334155; border: 1px solid #e2e8f0; background: #ffffff; }
-.accounts-list { display: flex; flex-direction: column; gap: 16px; max-width: 980px; }
-
-.loading-state,.empty-state { text-align: center; padding: 60px 20px; color: #64748b; font-size: 15px; }
-.error-state { background: #fee2e2; color: #991b1b; padding: 16px 20px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
-
-.btn-outline {
-  background: #ffffff;
-  border: 1px solid #0ea5e9;
-  color: #0ea5e9;
-  padding: 9px 18px;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
+.accounts-page {
+  max-width: 1200px;
+  margin: 0 auto;
 }
-.btn-outline:hover { background: #0ea5e9; color: white; }
 
-@media (max-width: 600px) {
-  .accounts-page { padding: 16px; }
-  .page-header { flex-direction: column; gap: 12px; }
+.page-title {
+  font-size: 26px;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+}
+
+.summary-bar {
+  margin-bottom: 16px;
+  color: var(--color-navy);
+}
+
+.accounts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 980px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-muted);
 }

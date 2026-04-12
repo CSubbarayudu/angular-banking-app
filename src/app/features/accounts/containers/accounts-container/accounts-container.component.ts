@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
@@ -24,7 +24,6 @@ export class AccountsContainerComponent implements OnInit {
   constructor(
     private readonly accountsService: AccountsService,
     private readonly router: Router,
-    private readonly cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private readonly platformId: object
   ) {}
 
@@ -44,12 +43,10 @@ export class AccountsContainerComponent implements OnInit {
         this.accounts = (Array.isArray(res) ? res : []).filter((a) => a.username === this.loggedInUser);
         this.totalBalance = this.accounts.reduce((sum, account) => sum + account.balance, 0);
         this.isLoading = false;
-        this.cdr.detectChanges();
       },
       error: (err: Error) => {
         this.errorMsg = err.message;
         this.isLoading = false;
-        this.cdr.detectChanges();
       }
     });
   }
