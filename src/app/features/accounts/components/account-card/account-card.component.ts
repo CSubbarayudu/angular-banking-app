@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Account } from '../../models/account.model';
 
 @Component({
   selector: 'app-account-card',
@@ -9,13 +10,20 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./account-card.component.css']
 })
 export class AccountCardComponent {
-  @Input() account: any;
-  @Input() interactive: boolean = true;  // 👈 ADD THIS LINE
+  @Input({ required: true }) account!: Account;
+  @Input() interactive: boolean = true;
   @Output() cardClicked = new EventEmitter<string>();
+  @Output() transactionsClicked = new EventEmitter<string>();
 
   onSelect(): void {
-    if (this.interactive) {             // 👈 ADD THIS CHECK
+    if (this.interactive) {
       this.cardClicked.emit(this.account.id);
+    }
+  }
+
+  onTransactions(): void {
+    if (this.interactive) {
+      this.transactionsClicked.emit(this.account.id);
     }
   }
 

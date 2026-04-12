@@ -1,15 +1,61 @@
 <div class="transactions-page">
-    <h1>Transaction History</h1>
+  <h2>Transaction History</h2>
 
-    @if (loading) {
-      <app-loader></app-loader>
+  <div class="filter-card">
+    <div class="filters">
+      <div class="filter-item">
+        <label>Type</label>
+        <select [(ngModel)]="filterType" (ngModelChange)="markDirty()">
+          <option value="">All</option>
+          <option value="Credit">Credit</option>
+          <option value="Debit">Debit</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label>Min Amount</label>
+        <input type="number" [(ngModel)]="minAmount" (ngModelChange)="markDirty()" />
+      </div>
+      <div class="filter-item">
+        <label>Max Amount</label>
+        <input type="number" [(ngModel)]="maxAmount" (ngModelChange)="markDirty()" />
+      </div>
+      <div class="filter-item">
+        <label>Start Date</label>
+        <input type="date" [(ngModel)]="startDate" (ngModelChange)="markDirty()" />
+      </div>
+      <div class="filter-item">
+        <label>End Date</label>
+        <input type="date" [(ngModel)]="endDate" (ngModelChange)="markDirty()" />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="applyFilters()">Apply Filters</button>
+      <button class="btn-outline" (click)="clearFilters()">Clear Filters</button>
+      <button class="btn-outline" (click)="sort('date')">Sort by Date ({{ sortOrder }})</button>
+      <button class="btn-outline" (click)="sort('amount')">Sort by Amount ({{ sortOrder }})</button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <app-loader></app-loader>
+  }
+
+  @if (error) {
+    <app-error-message [message]="error"></app-error-message>
+  }
+
+  @if (!loading && !error) {
+    <app-table [headers]="headers" [data]="transactions" [columns]="columns"></app-table>
+
+    @if (transactions.length === 0) {
+      <p class="empty">No transactions found.</p>
     }
 
-    @if (error) {
-      <app-error-message [message]="error"></app-error-message>
-    }
-
-    @if (!loading && !error) {
-      <app-table [headers]="headers" [data]="transactions" [columns]="columns"></app-table>
-    }
+    <div class="pagination-row">
+      <button class="btn-outline" (click)="prevPage()" [disabled]="page <= 1">Previous</button>
+      <span>Page {{ page }}</span>
+      <button class="btn-outline" (click)="nextPage()" [disabled]="transactions.length < limit">Next</button>
+    </div>
+  }
 </div>

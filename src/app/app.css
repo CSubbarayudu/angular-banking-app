@@ -21,7 +21,7 @@
 .top-bar {
   height: 56px;
   background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   padding: 0 32px;
@@ -46,7 +46,7 @@
 .top-bar-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1a56db;
+  color: #0ea5e9;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -54,12 +54,10 @@
 
 .top-bar-badge {
   font-size: 12px;
-  background: #ebf4ff;
-  color: #1a56db;
+  background: #e0f2fe;
+  color: #0369a1;
   padding: 4px 12px;
   border-radius: 20px;
-  font-weight: 500;
-  color: #057a55;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -83,7 +81,7 @@
   font-size: 22px;
   cursor: pointer;
   padding: 4px 8px;
-  color: #1e3a5f;
+  color: #1e293b;
 }
 
 @media (max-width: 768px) {

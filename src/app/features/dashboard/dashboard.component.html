@@ -1,101 +1,42 @@
 <div class="dashboard-container">
-  <!-- Error State -->
   @if (errorMsg && !isLoading) {
     <app-error-message [message]="errorMsg"></app-error-message>
   }
 
-  <!-- Loading State -->
   @if (isLoading) {
     <app-loader></app-loader>
   }
 
-  <!-- Content -->
   @if (!isLoading && !errorMsg) {
-    <!-- Header Section -->
     <div class="dashboard-header">
-      <div class="greeting">
-        <h2>{{ getGreeting() }}, {{ fullName }} 👋</h2>
-        <p>Here is your financial summary for today</p>
-      </div>
-      <button class="btn-primary" (click)="goToAccounts()">
-        View All Accounts
-      </button>
+      <h2>{{ getGreeting() }}, {{ fullName }}</h2>
+      <p>Here is your read-only financial overview.</p>
     </div>
 
-    <!-- Summary Cards -->
     <div class="summary-cards">
-      <!-- Total Balance Card -->
       <div class="summary-card balance-card">
-        <div class="card-icon">₹</div>
         <div class="card-label">Total Balance</div>
         <div class="amount">{{ totalBalance | currency:'INR':'symbol':'1.0-0' }}</div>
-        <div class="card-sublabel">Across all accounts</div>
       </div>
-
-      <!-- Total Credit Card -->
       <div class="summary-card credit-card">
-        <div class="card-icon">+</div>
         <div class="card-label">Total Credit</div>
         <div class="amount">{{ totalCredit | currency:'INR':'symbol':'1.0-0' }}</div>
-        <div class="card-sublabel">Total received</div>
       </div>
-
-      <!-- Total Debit Card -->
       <div class="summary-card debit-card">
-        <div class="card-icon">−</div>
         <div class="card-label">Total Debit</div>
         <div class="amount">{{ totalDebit | currency:'INR':'symbol':'1.0-0' }}</div>
-        <div class="card-sublabel">Total spent</div>
       </div>
     </div>
 
-    <!-- Accounts Section -->
-    <div class="accounts-section">
-      <div class="section-header">
-        <h3 class="section-title">Your Accounts</h3>
-      </div>
-      <div class="account-cards-grid">
-        @for (account of accounts; track account.id) {
-          <div class="account-card">
-            <div class="acc-type">🏦 {{ account.accountType }}</div>
-            <div class="acc-number">••••{{ account.accountNumber.slice(-4) }}</div>
-            <div class="acc-balance">{{ account.balance | currency:'INR':'symbol':'1.0-0' }}</div>
-            <button class="view-details-btn" (click)="goToAccountDetails(account.id)">
-              View Details →
-            </button>
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- Recent Transactions Section -->
-    <div class="transactions-section">
-      <div class="section-header">
-        <h3 class="section-title">Recent Transactions</h3>
-        <a class="view-all-link" (click)="goToAccounts()">View All →</a>
-      </div>
-
-      @if (recentTransactions.length > 0) {
-        <div class="transactions-list">
-          @for (transaction of recentTransactions; track transaction.id) {
-            <div class="transaction-row" [class.last-row]="$last">
-              <div class="tx-description">{{ transaction.description }}</div>
-              <div class="tx-account">••••{{ transaction.accountNumber.slice(-4) }}</div>
-              <div class="tx-amount" [class.credit]="transaction.type === 'Credit'"
-                [class.debit]="transaction.type === 'Debit'">
-                {{ transaction.type === 'Credit' ? '+' : '−' }}{{ transaction.amount | currency:'INR':'symbol':'1.0-0' }}
-              </div>
-              <div class="tx-date">{{ transaction.date }}</div>
-            </div>
-          }
-        </div>
-      }
+    <div class="transactions-section card">
+      <h3 class="section-title">Recent Activity</h3>
+      <app-table [headers]="tableHeaders" [columns]="tableColumns" [data]="recentTransactions"></app-table>
 
       @if (recentTransactions.length === 0) {
-        <div class="no-transactions">
-          <p>No transactions found</p>
-        </div>
+        <p class="no-transactions">No recent activity.</p>
       }
     </div>
+
+    <button class="btn-primary" (click)="goToAccounts()">Go to My Accounts →</button>
   }
 </div>

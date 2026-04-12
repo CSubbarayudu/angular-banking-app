@@ -1,45 +1,40 @@
 <div class="accounts-page">
-
-  <!-- Page Header -->
   <div class="page-header">
     <div>
       <h2 class="page-title">My Accounts</h2>
       <p class="page-subtitle">Manage and view your personal bank accounts</p>
     </div>
-    <button class="btn-outline" (click)="router.navigate(['/dashboard'])">
-      ← Back to Dashboard
-    </button>
+    <button class="btn-outline" (click)="goToDashboard()">← Back to Dashboard</button>
   </div>
 
-  <!-- Loading State -->
   @if (isLoading) {
     <app-loader></app-loader>
   }
 
-  <!-- Error State -->
   @if (errorMsg && !isLoading) {
     <app-error-message [message]="errorMsg"></app-error-message>
   }
 
-  <!-- Accounts List -->
   @if (!isLoading && !errorMsg) {
-    <div class="accounts-list">
+    <div class="summary-bar card">
+      You have <b>{{ accounts.length }}</b> accounts | Total Balance:
+      <b>{{ totalBalance | currency:'INR':'symbol':'1.0-0' }}</b>
+    </div>
 
-      <!-- Empty State -->
+    <div class="accounts-list">
       @if (accounts.length === 0) {
         <div class="empty-state">
           <p>No accounts found for your profile.</p>
         </div>
       }
 
-      <!-- Account Cards -->
       @for (account of accounts; track account.id) {
-        <app-account-card 
+        <app-account-card
           [account]="account"
-          (cardClicked)="goToDetails($event)">
+          (cardClicked)="goToDetails($event)"
+          (transactionsClicked)="goToTransactions($event)">
         </app-account-card>
       }
-
     </div>
   }
 </div>

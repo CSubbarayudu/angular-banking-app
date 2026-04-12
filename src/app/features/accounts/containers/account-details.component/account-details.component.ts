@@ -1,62 +1,69 @@
 import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { AccountsService } from '../../services/accounts.service';
-import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { AccountsService } from '../../services/accounts.service';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { Account } from '../../models/account.model';
+import { Transaction } from '../../models/transaction.model';
 import { AccountCardComponent } from '../../components/account-card/account-card.component';
 
 @Component({
   selector: 'app-account-details',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoaderComponent, AccountCardComponent],
+  imports: [CommonModule, LoaderComponent, ErrorMessageComponent, TableComponent, AccountCardComponent],
   templateUrl: './account-details.component.html',
   styleUrls: ['./account-details.component.css']
 })
 export class AccountDetailsComponent implements OnInit {
+  accountId = '';
+  account: Account | null = null;
+  transactions: Transaction[] = [];
 
-  accountId!: string;
-  account: any = null;
-  transactions: any[] = [];
   loading = false;
   accountLoading = false;
+  transactionsError = '';
+  accountError = '';
 
-  filterType = '';
-  minAmount: number | null = null;
-  maxAmount: number | null = null;
-  startDate = '';
-  endDate = '';
-
-  page = 1;
-  limit = 5;
-  sortField = 'date';
-  sortOrder = 'desc';
+  headers: Array<string> = ['Date', 'Description', 'Amount', 'Type', 'Status'];
+  columns: Array<keyof Transaction> = ['date', 'description', 'amount', 'type', 'status'];
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private service: AccountsService,
-    private cdr: ChangeDetectorRef,
-    @Inject(PLATFORM_ID) private platformId: Object  // ✅ ADDED
-  ) { }
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly service: AccountsService,
+    private readonly cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private readonly platformId: object,
+  ) {}
 
   ngOnInit(): void {
-    this.accountId = this.route.snapshot.paramMap.get('id') || '1';
+    this.accountId = this.route.snapshot.paramMap.get('id') || '';
     this.loadAccount();
     this.loadTransactions();
   }
 
+  hasUnsavedChanges(): boolean {
+    return false;
+  }
+
   loadAccount(): void {
     this.accountLoading = true;
+    this.accountError = '';
+
     this.service.getAccounts().subscribe({
-      next: (res: any[]) => {
-        this.account = res.find((a: any) => String(a.id) === String(this.accountId)) || res[0];
+      next: (res) => {
+        this.account = res.find((a) => a.id === this.accountId) || null;
+        if (!this.account) {
+          this.accountError = 'Account not found.';
+        }
         this.accountLoading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err: Error) => {
+        this.accountError = err.message;
         this.accountLoading = false;
         this.cdr.detectChanges();
       }
@@ -65,56 +72,27 @@ export class AccountDetailsComponent implements OnInit {
 
   loadTransactions(): void {
     this.loading = true;
-    this.cdr.detectChanges();
+    this.transactionsError = '';
 
-    const filters = {
-      type: this.filterType,
-      minAmount: this.minAmount,
-      maxAmount: this.maxAmount,
-      startDate: this.startDate,
-      endDate: this.endDate
-    };
-
-    this.service.getTransactions(
-      this.accountId, this.page, this.limit,
-      filters, this.sortField, this.sortOrder
-    ).subscribe({
-      next: (res: any) => {
+    this.service.getTransactions({
+      accountId: this.accountId,
+      page: 1,
+      limit: 5,
+      sortField: 'date',
+      sortOrder: 'desc'
+    }).subscribe({
+      next: (res) => {
         this.transactions = res;
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.error('Transactions API error:', err);
+      error: (err: Error) => {
+        this.transactionsError = err.message;
         this.transactions = [];
         this.loading = false;
         this.cdr.detectChanges();
       }
     });
-  }
-
-  applyFilters(): void { this.page = 1; this.loadTransactions(); }
-
-  clearFilters(): void {
-    this.filterType = '';
-    this.minAmount = null;
-    this.maxAmount = null;
-    this.startDate = '';
-    this.endDate = '';
-    this.page = 1;
-    this.loadTransactions();
-  }
-
-  sort(field: string): void {
-    this.sortField = field;
-    this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-    this.loadTransactions();
-  }
-
-  nextPage(): void { this.page++; this.loadTransactions(); }
-
-  prevPage(): void {
-    if (this.page > 1) { this.page--; this.loadTransactions(); }
   }
 
   goBack(): void { this.router.navigate(['/accounts']); }
@@ -123,62 +101,61 @@ export class AccountDetailsComponent implements OnInit {
     this.router.navigate(['/accounts', this.accountId, 'statements']);
   }
 
+  viewAllTransactions(): void {
+    this.router.navigate(['/accounts', this.accountId, 'transactions']);
+  }
+
   downloadFilteredPDF(): void {
-    if (!this.account) return;
+    if (!this.account) {
+      return;
+    }
 
-    const filters = {
-      type: this.filterType,
-      minAmount: this.minAmount,
-      maxAmount: this.maxAmount,
-      startDate: this.startDate,
-      endDate: this.endDate
-    };
-
-    this.service.getTransactions(
-      this.accountId, 1, 100,
-      filters, this.sortField, this.sortOrder
-    ).subscribe({
-      next: (allFiltered: any[]) => {
-        if (!allFiltered?.length) {
-          alert('No transactions found for the selected filters.');
+    this.service.getTransactions({
+      accountId: this.accountId,
+      page: 1,
+      limit: 100,
+      sortField: 'date',
+      sortOrder: 'desc'
+    }).subscribe({
+      next: (allFiltered) => {
+        if (!allFiltered.length) {
+          this.transactionsError = 'No transactions found for this account.';
+          this.cdr.detectChanges();
           return;
         }
         this.generatePDF(allFiltered);
       },
-      error: () => {
-        alert('Failed to fetch transactions for PDF.');
+      error: (err: Error) => {
+        this.transactionsError = err.message;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  private generatePDF(data: any[]): void {
+  private generatePDF(data: Transaction[]): void {
     const doc = new jsPDF('p', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
     const marginLeft = 14;
     let currentY = 20;
 
-    // ── HEADER ──────────────────────────────────────────────
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
     doc.text('BANK STATEMENT', pageWidth / 2, currentY, { align: 'center' });
 
-    // ── SUBTITLE ─────────────────────────────────────────────
     currentY += 8;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
-    doc.text(this.buildFilterLabel(), pageWidth / 2, currentY, { align: 'center' });
+    doc.text('Last 100 Transactions', pageWidth / 2, currentY, { align: 'center' });
 
     currentY += 10;
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
 
-    // ── ACCOUNT DETAILS ──────────────────────────────────────
-    const accountNumber = this.account.accountNumber || this.account.id || 'N/A';
-    const accountType = this.account.accountType || this.account.type || 'N/A';
-    const balanceValue = this.account.balance != null
+    const accountNumber = this.account?.accountNumber || 'N/A';
+    const accountType = this.account?.accountType || 'N/A';
+    const balanceValue = this.account?.balance != null
       ? `Rs. ${Number(this.account.balance).toFixed(2)}` : 'N/A';
 
-    // ✅ SSR SAFE — only read localStorage in browser
     const loggedInUser = isPlatformBrowser(this.platformId)
       ? localStorage.getItem('loggedInUser') || 'N/A'
       : 'N/A';
@@ -195,11 +172,10 @@ export class AccountDetailsComponent implements OnInit {
       `Generated Date: ${generatedDate}`
     ];
 
-    details.forEach(line => { currentY += 6; doc.text(line, marginLeft, currentY); });
+    details.forEach((line) => { currentY += 6; doc.text(line, marginLeft, currentY); });
     currentY += 10;
 
-    // ── TRANSACTIONS TABLE ───────────────────────────────────
-    const tableRows = data.map(tx => [
+    const tableRows = data.map((tx) => [
       tx.date ? this.formatDate(tx.date) : 'N/A',
       tx.description || '',
       `Rs. ${Number(tx.amount || 0).toFixed(2)}`,
@@ -207,64 +183,20 @@ export class AccountDetailsComponent implements OnInit {
       tx.status || 'N/A'
     ]);
 
-    const totalDebits = data.filter(tx => String(tx.type).toLowerCase() === 'debit')
-      .reduce((s, tx) => s + Number(tx.amount || 0), 0);
-    const totalCredits = data.filter(tx => String(tx.type).toLowerCase() === 'credit')
-      .reduce((s, tx) => s + Number(tx.amount || 0), 0);
-    const netChange = totalCredits - totalDebits;
-
     autoTable(doc, {
       startY: currentY,
       head: [['Date', 'Description', 'Amount', 'Type', 'Status']],
       body: tableRows,
       styles: { font: 'helvetica', fontSize: 10, cellPadding: 3 },
-      headStyles: { fillColor: [33, 150, 243], textColor: 255, fontStyle: 'bold' },
+      headStyles: { fillColor: [14, 165, 233], textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [245, 245, 245] },
       theme: 'grid',
       margin: { left: marginLeft, right: marginLeft },
       showHead: 'everyPage',
     });
 
-    const finalY = (doc as any).lastAutoTable?.finalY || doc.internal.pageSize.getHeight() - 30;
-    const summaryY = finalY + 12;
-
-    // ── SUMMARY ──────────────────────────────────────────────
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('SUMMARY', marginLeft, summaryY);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text(`Total Debits:  Rs. ${totalDebits.toFixed(2)}`, marginLeft, summaryY + 8);
-    doc.text(`Total Credits: Rs. ${totalCredits.toFixed(2)}`, marginLeft, summaryY + 14);
-    doc.text(`Net Change:    Rs. ${netChange.toFixed(2)}`, marginLeft, summaryY + 20);
-
-    // ── FOOTER ───────────────────────────────────────────────
-    const timestamp = new Date().toLocaleTimeString();
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'italic');
-    doc.text(
-      `End of Statement - ${generatedDate} ${timestamp}`,
-      pageWidth / 2,
-      doc.internal.pageSize.getHeight() - 15,
-      { align: 'center' }
-    );
-
-    // ── SAVE ─────────────────────────────────────────────────
     const sanitized = String(accountNumber).replace(/\s+/g, '_');
-    const fromLabel = this.startDate || 'All';
-    const toLabel = this.endDate || 'All';
-    doc.save(`statement_${sanitized}_${fromLabel}_to_${toLabel}.pdf`);
-  }
-
-  private buildFilterLabel(): string {
-    const parts: string[] = [];
-    if (this.filterType) parts.push(`Type: ${this.filterType}`);
-    if (this.minAmount) parts.push(`Min: Rs.${this.minAmount}`);
-    if (this.maxAmount) parts.push(`Max: Rs.${this.maxAmount}`);
-    if (this.startDate) parts.push(`From: ${this.startDate}`);
-    if (this.endDate) parts.push(`To: ${this.endDate}`);
-    return parts.length ? `Filters Applied - ${parts.join(' | ')}` : 'All Transactions';
+    doc.save(`statement_${sanitized}_${generatedDate}.pdf`);
   }
 
   private formatDate(date: Date | string): string {

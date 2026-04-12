@@ -6,7 +6,6 @@
     </div>
 
     <form (ngSubmit)="onLogin()" class="login-form">
-      <!-- Username Field -->
       <div class="form-group">
         <label for="username">Username</label>
         <input
@@ -20,7 +19,6 @@
         />
       </div>
 
-      <!-- Password Field -->
       <div class="form-group">
         <label for="password">Password</label>
         <input
@@ -32,23 +30,26 @@
           class="form-control"
           autocomplete="current-password"
         />
-        <!-- ✅ REMOVED: (keyup.enter)="onLogin()" — was causing double submit -->
       </div>
 
-      <!-- Error Message -->
-      <div class="login-error" *ngIf="errorMessage && !isLoading">
-        <span>⚠️ {{ errorMessage }}</span>
-      </div>
+      @if (errorMessage && !isLoading) {
+        <app-error-message [message]="errorMessage"></app-error-message>
+      }
 
-      <!-- Submit Button -->
       <button
         type="submit"
         class="login-btn"
         [disabled]="isLoading">
-        <!-- ✅ REMOVED: (click)="onLogin()" — was causing double submit -->
-        <span *ngIf="!isLoading">Login →</span>
-        <span *ngIf="isLoading">⏳ Verifying...</span>
+        @if (!isLoading) {
+          <span>Login →</span>
+        } @else {
+          <span>⏳ Verifying...</span>
+        }
       </button>
+
+      @if (isLoading) {
+        <app-loader></app-loader>
+      }
     </form>
   </div>
 </div>
