@@ -23,8 +23,7 @@ export const routes: Routes = [
     path: 'accounts',
     canActivate: [authGuard],
     loadChildren: () =>
-      import('./features/accounts/accounts.module')
-        .then(m => m.AccountsModule)
+      import('./features/accounts/accounts.routes').then((m) => m.ACCOUNTS_ROUTES),
   },
   {
     path: '**',

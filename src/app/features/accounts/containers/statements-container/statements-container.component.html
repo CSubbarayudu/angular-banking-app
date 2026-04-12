@@ -11,16 +11,12 @@
 
   <!-- Loading State -->
   @if (accountLoading || transactionsLoading) {
-    <div class="loading-state">
-      <p>Loading your statement...</p>
-    </div>
+    <app-loader></app-loader>
   }
 
   <!-- Error State -->
   @if ((accountError || transactionsError) && !accountLoading && !transactionsLoading) {
-    <div class="error-card">
-      {{ accountError || transactionsError }}
-    </div>
+    <app-error-message [message]="accountError || transactionsError"></app-error-message>
   }
 
   <!-- Main Content -->

@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Transaction } from '../../../features/accounts/models/transaction.model';
 
 @Component({
   selector: 'app-table',
@@ -9,6 +10,6 @@ import { Component, Input } from '@angular/core';
 })
 export class TableComponent {
   @Input() headers: string[] = [];
-  @Input() data: any[] = [];
-  @Input() columns: string[] = [];
+  @Input() data: Transaction[] = [];
+  @Input() columns: Array<keyof Transaction> = [];
 }
