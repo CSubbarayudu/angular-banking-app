@@ -25,11 +25,7 @@ export class AccountsService {
           const user = users.find(
             (u) => u.username === username.trim() && u.password === password,
           );
-
-          if (!user) {
-            return null;
-          }
-
+          if (!user) return null;
           return {
             token: `Bearer ${user.id}`,
             username: user.username,
@@ -49,7 +45,13 @@ export class AccountsService {
     const params = this.buildTransactionParams(query);
 
     return this.http
-      .get<Transaction[]>(`${this.baseUrl}/transactions`, { params })
+      .get<Transaction[]>(`${this.baseUrl}/transactions`, {
+        params,
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      })
       .pipe(timeout(this.requestTimeoutMs));
   }
 
@@ -64,22 +66,21 @@ export class AccountsService {
     if (query.type) {
       params = params.set('type', query.type);
     }
-
     if (query.minAmount != null) {
       params = params.set('amount_gte', String(query.minAmount));
     }
-
     if (query.maxAmount != null) {
       params = params.set('amount_lte', String(query.maxAmount));
     }
-
     if (query.startDate) {
       params = params.set('date_gte', query.startDate);
     }
-
     if (query.endDate) {
       params = params.set('date_lte', query.endDate);
     }
+
+    // busts browser 304 cache every single call
+    params = params.set('_t', Date.now().toString());
 
     return params;
   }

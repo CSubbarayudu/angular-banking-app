@@ -1,10 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
 import { Transaction } from '../../models/transaction.model';
-import { TableComponent } from '../../../../shared/components/table/table.component';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
 import { HasUnsavedState } from '../../../../core/guards/unsaved-filters.guard';
@@ -12,38 +11,30 @@ import { HasUnsavedState } from '../../../../core/guards/unsaved-filters.guard';
 @Component({
   selector: 'app-transactions-container',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableComponent, LoaderComponent, ErrorMessageComponent],
+  imports: [CommonModule, FormsModule, LoaderComponent, ErrorMessageComponent],
   templateUrl: './transactions-container.component.html',
   styleUrls: ['./transactions-container.css']
 })
 export class TransactionsContainerComponent implements OnInit, HasUnsavedState {
   transactions: Transaction[] = [];
-  headers = ['Date', 'Amount', 'Type', 'Status', 'Description'];
-  columns: Array<keyof Transaction> = ['date', 'amount', 'type', 'status', 'description'];
   accountId = '';
   loading = false;
   error = '';
   isDirty = false;
-
-  headers = ['Date', 'Description', 'Amount', 'Type', 'Status'];
-  columns: Array<keyof Transaction> = ['date', 'description', 'amount', 'type', 'status'];
-
   page = 1;
   limit = 5;
   sortField: 'date' | 'amount' = 'date';
   sortOrder: 'asc' | 'desc' = 'desc';
-
   filterType: 'Credit' | 'Debit' | '' = '';
   startDate = '';
   endDate = '';
   minAmount: number | null = null;
   maxAmount: number | null = null;
-  accountId = '';
 
   constructor(
     private readonly service: AccountsService,
     private readonly route: ActivatedRoute,
-    private readonly cdr: ChangeDetectorRef,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -51,18 +42,13 @@ export class TransactionsContainerComponent implements OnInit, HasUnsavedState {
     this.loadTransactions();
   }
 
-  hasUnsavedChanges(): boolean {
-    return this.isDirty;
-  }
-
-  markDirty(): void {
-    this.isDirty = true;
-  }
+  hasUnsavedChanges(): boolean { return this.isDirty; }
+  markDirty(): void { this.isDirty = true; }
+  goBack(): void { this.router.navigate(['/accounts', this.accountId]); }
 
   loadTransactions(): void {
     this.loading = true;
     this.error = '';
-
     this.service.getTransactions({
       accountId: this.accountId,
       page: this.page,
@@ -78,21 +64,15 @@ export class TransactionsContainerComponent implements OnInit, HasUnsavedState {
       next: (res) => {
         this.transactions = res;
         this.loading = false;
-        this.cdr.detectChanges();
       },
       error: (err: Error) => {
         this.error = err.message;
         this.loading = false;
-        this.cdr.detectChanges();
       }
     });
   }
 
-  applyFilters(): void {
-    this.isDirty = false;
-    this.page = 1;
-    this.loadTransactions();
-  }
+  applyFilters(): void { this.isDirty = false; this.page = 1; this.loadTransactions(); }
 
   clearFilters(): void {
     this.filterType = '';
@@ -111,15 +91,6 @@ export class TransactionsContainerComponent implements OnInit, HasUnsavedState {
     this.loadTransactions();
   }
 
-  nextPage(): void {
-    this.page++;
-    this.loadTransactions();
-  }
-
-  prevPage(): void {
-    if (this.page > 1) {
-      this.page--;
-      this.loadTransactions();
-    }
-  }
+  nextPage(): void { this.page++; this.loadTransactions(); }
+  prevPage(): void { if (this.page > 1) { this.page--; this.loadTransactions(); } }
 }
