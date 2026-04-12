@@ -11,12 +11,19 @@ import { Account } from '../../models/account.model';
 })
 export class AccountCardComponent {
   @Input({ required: true }) account!: Account;
-  @Input() interactive: boolean = true;  // 👈 ADD THIS LINE
+  @Input() interactive: boolean = true;
   @Output() cardClicked = new EventEmitter<string>();
+  @Output() transactionsClicked = new EventEmitter<string>();
 
   onSelect(): void {
-    if (this.interactive) {             // 👈 ADD THIS CHECK
+    if (this.interactive) {
       this.cardClicked.emit(this.account.id);
+    }
+  }
+
+  onTransactions(): void {
+    if (this.interactive) {
+      this.transactionsClicked.emit(this.account.id);
     }
   }
 

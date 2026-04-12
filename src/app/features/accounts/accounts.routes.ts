@@ -18,6 +18,7 @@ export const ACCOUNTS_ROUTES: Routes = [
   },
   {
     path: ':id/transactions',
+    canDeactivate: [unsavedFiltersGuard],
     loadComponent: () =>
       import('./containers/transactions-container/transactions-container.component').then(
         (m) => m.TransactionsContainerComponent,
@@ -25,7 +26,6 @@ export const ACCOUNTS_ROUTES: Routes = [
   },
   {
     path: ':id',
-    canDeactivate: [unsavedFiltersGuard],
     loadComponent: () =>
       import('./containers/account-details.component/account-details.component').then(
         (m) => m.AccountDetailsComponent,

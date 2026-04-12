@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AccountsService } from '../../services/accounts.service';
 import { Account } from '../../models/account.model';
@@ -7,30 +7,26 @@ import { AccountCardComponent } from '../../components/account-card/account-card
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
 
-
 @Component({
   selector: 'app-accounts-container',
   standalone: true,
-  imports: [AccountCardComponent, LoaderComponent, ErrorMessageComponent],
+  imports: [AccountCardComponent, LoaderComponent, ErrorMessageComponent, CurrencyPipe],
   templateUrl: './accounts-container.component.html',
   styleUrls: ['./accounts-container.component.css']
 })
 export class AccountsContainerComponent implements OnInit {
-
   accounts: Account[] = [];
   isLoading = true;
   errorMsg = '';
   loggedInUser = '';
-  router: Router;
+  totalBalance = 0;
 
   constructor(
-    private accountsService: AccountsService,
-    router: Router,
-    private cdr: ChangeDetectorRef,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    this.router = router;
-  }
+    private readonly accountsService: AccountsService,
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private readonly platformId: object
+  ) {}
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -45,14 +41,13 @@ export class AccountsContainerComponent implements OnInit {
 
     this.accountsService.getAccounts().subscribe({
       next: (res: Account[]) => {
-        this.accounts = (Array.isArray(res) ? res : []).filter(
-          (a) => a.username === this.loggedInUser
-        );
+        this.accounts = (Array.isArray(res) ? res : []).filter((a) => a.username === this.loggedInUser);
+        this.totalBalance = this.accounts.reduce((sum, account) => sum + account.balance, 0);
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.errorMsg = 'Unable to load accounts. Check json-server on port 3005.';
+      error: (err: Error) => {
+        this.errorMsg = err.message;
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -63,25 +58,11 @@ export class AccountsContainerComponent implements OnInit {
     this.router.navigate(['/accounts', id]);
   }
 
-  getAccountIcon(type: string): string {
-    const icons: Record<string, string> = {
-      'Savings': '🏦',
-      'Current': '💼',
-      'Fixed Deposit': '🔒'
-    };
-    return icons[type] || '💳';
+  goToTransactions(id: string): void {
+    this.router.navigate(['/accounts', id, 'transactions']);
   }
 
-  getMaskedNumber(accountNumber: string): string {
-    return '••••' + accountNumber.slice(-4);
-  }
-
-  getStatusClass(status: string): string {
-    const map: Record<string, string> = {
-      'Active': 'badge-active',
-      'Inactive': 'badge-inactive',
-      'Blocked': 'badge-blocked'
-    };
-    return map[status] || 'badge-active';
+  goToDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 }
