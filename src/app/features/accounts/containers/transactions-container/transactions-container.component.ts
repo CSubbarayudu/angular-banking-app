@@ -1,8 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
 import { AccountsService } from '../../services/accounts.service';
 import { Transaction } from '../../models/transaction.model';
+import { TransactionQuery } from '../../models/transaction-query.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
@@ -10,102 +12,94 @@ import { ErrorMessageComponent } from '../../../../shared/components/error-messa
 @Component({
   selector: 'app-transactions-container',
   standalone: true,
-  imports: [CommonModule, TableComponent, LoaderComponent, ErrorMessageComponent],
-  template: `
-    <div style="padding: 20px;">
-      <h2>Transaction History</h2>
-
-      @if (loading) {
-        <app-loader></app-loader>
-      }
-
-      @if (errorMsg && !loading) {
-        <app-error-message [message]="errorMsg"></app-error-message>
-      }
-
-      @if (!loading && !errorMsg) {
-        <app-table
-          [headers]="headers"
-          [columns]="columns"
-          [data]="transactions">
-        </app-table>
-
-        @if (transactions.length === 0) {
-          <p style="color: #666; margin-top: 16px;">No transactions found.</p>
-        }
-
-        <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center;">
-          <button
-            (click)="prevPage()"
-            [disabled]="page === 1"
-            style="padding: 6px 14px; cursor: pointer;">
-            ← Previous
-          </button>
-          <span>Page {{ page }}</span>
-          <button
-            (click)="nextPage()"
-            [disabled]="transactions.length < limit"
-            style="padding: 6px 14px; cursor: pointer;">
-            Next →
-          </button>
-        </div>
-      }
-    </div>
-  `
+  imports: [FormsModule, TableComponent, LoaderComponent, ErrorMessageComponent],
+  templateUrl: './transactions-container.component.html'
 })
 export class TransactionsContainerComponent implements OnInit {
   transactions: Transaction[] = [];
-  headers = ['Date', 'Amount', 'Type', 'Status', 'Description'];
-  columns: Array<keyof Transaction> = ['date', 'amount', 'type', 'status', 'description'];
-  accountId = '';
   loading = false;
-  errorMsg = '';
+  error = '';
+
+  headers = ['Date', 'Amount', 'Type', 'Status'];
+  columns: Array<keyof Transaction> = ['date', 'amount', 'type', 'status'];
+
   page = 1;
   limit = 5;
+  sortField: TransactionQuery['sortField'] = 'date';
+  sortOrder: TransactionQuery['sortOrder'] = 'desc';
+
+  filterType: 'Credit' | 'Debit' | '' = '';
+  startDate = '';
+  endDate = '';
+  minAmount: number | null = null;
+  maxAmount: number | null = null;
+  accountId = '';
 
   constructor(
+    private readonly service: AccountsService,
     private readonly route: ActivatedRoute,
-    private readonly accountsService: AccountsService,
-    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.accountId = this.route.snapshot.paramMap.get('id') ?? '';
+    this.accountId = this.route.snapshot.paramMap.get('id') || '1';
     this.loadTransactions();
   }
 
   loadTransactions(): void {
     this.loading = true;
-    this.errorMsg = '';
 
-    this.accountsService
-      .getTransactions({
-        accountId: this.accountId,
-        page: this.page,
-        limit: this.limit,
-        sortField: 'date',
-        sortOrder: 'desc',
-      })
-      .subscribe({
-        next: (data) => {
-          this.transactions = data;
-          this.loading = false;
-          this.cdr.detectChanges();
-        },
-        error: (err: Error) => {
-          this.errorMsg = err?.message ?? 'Failed to load transactions.';
-          this.loading = false;
-          this.cdr.detectChanges();
-        }
-      });
+    const query: TransactionQuery = {
+      accountId: this.accountId,
+      page: this.page,
+      limit: this.limit,
+      sortField: this.sortField,
+      sortOrder: this.sortOrder,
+      type: this.filterType,
+      startDate: this.startDate,
+      endDate: this.endDate,
+      minAmount: this.minAmount,
+      maxAmount: this.maxAmount,
+    };
+
+    this.service.getTransactions(query).subscribe({
+      next: (res) => {
+        this.transactions = res;
+        this.loading = false;
+      },
+      error: (err: Error) => {
+        this.error = err.message;
+        this.loading = false;
+      }
+    });
   }
 
-  nextPage(): void {
+  applyFilters() {
+    this.page = 1;
+    this.loadTransactions();
+  }
+
+  clearFilters() {
+    this.filterType = '';
+    this.startDate = '';
+    this.endDate = '';
+    this.minAmount = null;
+    this.maxAmount = null;
+    this.page = 1;
+    this.loadTransactions();
+  }
+
+  sort(field: TransactionQuery['sortField']) {
+    this.sortField = field;
+    this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+    this.loadTransactions();
+  }
+
+  nextPage() {
     this.page++;
     this.loadTransactions();
   }
 
-  prevPage(): void {
+  prevPage() {
     if (this.page > 1) {
       this.page--;
       this.loadTransactions();

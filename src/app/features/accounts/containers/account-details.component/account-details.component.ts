@@ -41,7 +41,6 @@ export class AccountDetailsComponent implements OnInit {
   sortOrder: 'asc' | 'desc' = 'desc';
 
   private lastAppliedFilters: TransactionFilters = {};
-  private isDirty = false;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -58,11 +57,7 @@ export class AccountDetailsComponent implements OnInit {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.isDirty;
-  }
-
-  markDirty(): void {
-    this.isDirty = true;
+    return JSON.stringify(this.getCurrentFilters()) !== JSON.stringify(this.lastAppliedFilters);
   }
 
   loadAccount(): void {
@@ -115,7 +110,7 @@ export class AccountDetailsComponent implements OnInit {
     });
   }
 
-  applyFilters(): void { this.isDirty = false; this.page = 1; this.loadTransactions(); }
+  applyFilters(): void { this.page = 1; this.loadTransactions(); }
 
   clearFilters(): void {
     this.filterType = '';
@@ -124,7 +119,6 @@ export class AccountDetailsComponent implements OnInit {
     this.startDate = '';
     this.endDate = '';
     this.page = 1;
-    this.isDirty = false;
     this.loadTransactions();
   }
 

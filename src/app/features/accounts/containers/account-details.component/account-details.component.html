@@ -29,16 +29,16 @@
     <div class="filters">
       <div class="filter-item">
         <label>Type</label>
-        <select [(ngModel)]="filterType" (ngModelChange)="markDirty()">
+        <select [(ngModel)]="filterType">
           <option value="">All</option>
           <option value="Credit">Credit</option>
           <option value="Debit">Debit</option>
         </select>
       </div>
-      <div class="filter-item"><label>Min Amount</label><input type="number" [(ngModel)]="minAmount" (ngModelChange)="markDirty()" /></div>
-      <div class="filter-item"><label>Max Amount</label><input type="number" [(ngModel)]="maxAmount" (ngModelChange)="markDirty()" /></div>
-      <div class="filter-item"><label>From Date</label><input type="date" [(ngModel)]="startDate" (ngModelChange)="markDirty()" /></div>
-      <div class="filter-item"><label>To Date</label><input type="date" [(ngModel)]="endDate" (ngModelChange)="markDirty()" /></div>
+      <div class="filter-item"><label>Min Amount</label><input type="number" [(ngModel)]="minAmount" /></div>
+      <div class="filter-item"><label>Max Amount</label><input type="number" [(ngModel)]="maxAmount" /></div>
+      <div class="filter-item"><label>From Date</label><input type="date" [(ngModel)]="startDate" /></div>
+      <div class="filter-item"><label>To Date</label><input type="date" [(ngModel)]="endDate" /></div>
       <div class="filter-actions">
         <button (click)="applyFilters()" class="btn-primary">Apply</button>
         <button (click)="clearFilters()" class="btn-secondary">Clear</button>
